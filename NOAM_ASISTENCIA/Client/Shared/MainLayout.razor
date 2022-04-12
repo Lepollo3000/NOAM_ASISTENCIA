@@ -1,18 +1,85 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<Layout Sider="true">
+    <LayoutSider>
+        <LayoutSiderContent>
+            <Bar Breakpoint="Breakpoint.Desktop" NavigationBreakpoint="Breakpoint.None" ThemeContrast="ThemeContrast.Dark" Mode="BarMode.VerticalInline" CollapseMode="BarCollapseMode.Small">
+                <BarToggler />
 
-    <main>
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+                <BarBrand>
+                    <BarItem>
+                        <BarLink To="/" TextAlignment="TextAlignment.Justified">
+                            Joluma POS
+                        </BarLink>
+                    </BarItem>
+                </BarBrand>
 
-        <article class="content px-4">
+                <BarMenu>
+                    <BarStart>
+                        <BarItem>
+                            <BarLink To="">
+                                <Div Style="float: left;">Inicio</Div>
+                                <BarIcon IconName="@("fa-home")" Style="float: right; margin-right: 20px;" />
+                            </BarLink>
+                        </BarItem>
+
+                        <AuthorizeView Roles="Administrador">
+                            <BarItem>
+                                <BarDropdown>
+                                    <BarDropdownToggle>
+                                        Administración
+                                        <BarIcon IconName="@("fa-users")" Style="float: right; margin-right: 20px;" />
+                                    </BarDropdownToggle>
+                                    <BarDropdownMenu>
+                                        <NavMenuAdministrador />
+                                    </BarDropdownMenu>
+                                </BarDropdown>
+                            </BarItem>
+                        </AuthorizeView>
+
+                        <AuthorizeView Roles="Gerente">
+                            <BarItem>
+                                <BarDropdown>
+                                    <BarDropdownToggle>
+                                        Gerencia
+                                        <BarIcon IconName="@("fa-user-tie")" Style="float: right; margin-right: 20px;" />
+                                    </BarDropdownToggle>
+                                    <BarDropdownMenu>
+                                        <NavMenuGerente />
+                                    </BarDropdownMenu>
+                                </BarDropdown>
+                            </BarItem>
+                        </AuthorizeView>
+
+                        <AuthorizeView Roles="Cajero">
+                            <NavMenu />
+                        </AuthorizeView>
+                    </BarStart>
+                </BarMenu>
+            </Bar>
+        </LayoutSiderContent>
+    </LayoutSider>
+
+    <Layout>
+        <LayoutHeader Fixed="true">
+            <Bar Style="height: 65px;" Breakpoint="Breakpoint.Desktop" NavigationBreakpoint="Breakpoint.Mobile" Background="Background.Light" ThemeContrast="ThemeContrast.Light">
+                <BarMenu>
+                    <BarEnd>
+                        <BarItem>
+                            <LoginDisplay />
+                        </BarItem>
+                    </BarEnd>
+                </BarMenu>
+            </Bar>
+        </LayoutHeader>
+
+        <LayoutContent Padding="Padding.Is5">
             @Body
-        </article>
-    </main>
-</div>
+        </LayoutContent>
+    </Layout>
+</Layout>
+
+@code{
+    private bool siderVisible = true;
+    private bool uiElementsVisible = true;
+}

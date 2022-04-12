@@ -1,0 +1,26 @@
+﻿@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Acceso Denegado";
+}
+
+<div class="col justify-content-center p-5">
+    <div class="text-center">
+        <div>
+            <h1 class="text-danger">@ViewData["Title"]</h1>
+        </div>
+
+        <hr />
+
+        <p class="text-danger">
+            No tiene acceso a este recurso. Inicie sesión con otra cuenta o regrese
+            a la pantalla inicial.
+        </p>
+
+        <div>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                Volver a Inicio
+            </a>
+        </div>
+    </div>
+</div>

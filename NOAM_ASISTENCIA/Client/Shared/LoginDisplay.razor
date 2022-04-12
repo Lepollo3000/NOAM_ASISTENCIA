@@ -3,15 +3,76 @@
 
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
+@inject HttpClient Http
+@inject AuthenticationStateProvider _authProvider
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Hello, @context.User.Identity?.Name!</a>
-        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+        <BarDropdown>
+            <BarDropdownToggle>
+                Opciones de usuario <Icon Name="@("fa-user")" />
+            </BarDropdownToggle>
+
+            <BarDropdownMenu Style="padding: 15px; min-width: 300px;" RightAligned="true">
+                <BarDropdownItem To="authentication/profile">
+                    <Row>
+                        <Column>
+                            Perfil de Usuario
+                        </Column>
+
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Icon Name="@("fa-user-circle")" />
+                        </Column>
+                    </Row>
+                </BarDropdownItem>
+
+                <BarDropdownItem @onclick="BeginSignOut">
+                    <Row>
+                        <Column>
+                            Cerrar Sesión
+                        </Column>
+
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Icon Name="@("fa-door-open")" />
+                        </Column>
+                    </Row>
+                </BarDropdownItem>
+            </BarDropdownMenu>
+        </BarDropdown>
     </Authorized>
+
     <NotAuthorized>
-        <a href="authentication/register">Register</a>
-        <a href="authentication/login">Log in</a>
+        <BarDropdown>
+            <BarDropdownToggle>
+                Iniciar sesión <Icon Name="@("fa-user")" />
+            </BarDropdownToggle>
+
+            <BarDropdownMenu Style="padding: 15px; min-width: 300px;" RightAligned="true">
+                <BarDropdownItem To="authentication/register">
+                    <Row>
+                        <Column>
+                            Registrarse
+                        </Column>
+
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Icon Name="@("fa-user-plus")" />
+                        </Column>
+                    </Row>
+                </BarDropdownItem>
+
+                <BarDropdownItem To="authentication/login">
+                    <Row>
+                        <Column>
+                            Iniciar Sesión
+                        </Column>
+
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Icon Name="@("fa-user-shield")" />
+                        </Column>
+                    </Row>
+                </BarDropdownItem>
+            </BarDropdownMenu>
+        </BarDropdown>
     </NotAuthorized>
 </AuthorizeView>
 
