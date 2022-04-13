@@ -3,12 +3,6 @@ using NOAM_ASISTENCIA.Server.Models;
 //using NOAM_ASISTENCIA.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using NOAM_ASISTENCIA.Server.Data;
-using NOAM_ASISTENCIA.Server.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NOAM_ASISTENCIA.Server
 {
