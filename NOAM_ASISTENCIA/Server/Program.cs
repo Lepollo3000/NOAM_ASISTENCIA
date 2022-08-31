@@ -1,21 +1,25 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using NOAM_ASISTENCIA.Server;
 using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;
 
+// Scaffold-DbContext "Server=localhost,1433;Database=NOAM_ASISTENCIA;User Id=sa;Password=Pa55w.rd" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -DataAnnotations -Force
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddRoles<IdentityRole<Guid>>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
@@ -41,6 +45,16 @@ else
     app.UseHsts();
 }
 
+// INITIALIZE DATABASE CONTEXT
+using (var scope = app.Services.CreateScope())
+{
+    var dbcontext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    InitializeDb(dbcontext, userManager, roleManager);
+}
+
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
@@ -57,3 +71,10 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+static void InitializeDb(ApplicationDbContext dbcontext, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+{
+    InitDB.TryToMigrate(dbcontext);
+    InitDB.TryCreateDefaultUsersAndRoles(userManager, roleManager);
+    InitDB.TrySeedDefaultData(dbcontext);
+}

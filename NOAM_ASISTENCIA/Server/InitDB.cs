@@ -1,21 +1,20 @@
 ﻿using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;
-//using NOAM_ASISTENCIA.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NOAM_ASISTENCIA.Server.Models.Utils;
 
 namespace NOAM_ASISTENCIA.Server
 {
     public class InitDB
     {
-        public static bool TryToMigrate(/*FswDevContext dbcontext,*/ ApplicationDbContext identitycontext)
+        public static bool TryToMigrate(ApplicationDbContext dbcontext)
         {
             try
             {
-                identitycontext.Database.Migrate();
-                //dbcontext.Database.Migrate();
+                dbcontext.Database.Migrate();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -31,27 +30,27 @@ namespace NOAM_ASISTENCIA.Server
 
             string strAdministradorEmail = "usuario.administrador@gmail.com";
             string strAdministradorPassword = "Pa55w.rd";
-            string strAdministradorFirstName = "Usuario";
-            string strAdministradorLastName = "Administrador";
+            string strAdministradorNombre = "Usuario";
+            string strAdministradorApellido = "Administrador";
 
             string strGerenteEmail = "usuario.gerente@gmail.com";
             string strGerentePassword = "Pa55w.rd";
-            string strGerenteFirstName = "Usuario";
-            string strGerenteLastName = "Gerente";
+            string strGerenteNombre = "Usuario";
+            string strGerenteApellido = "Gerente";
 
             string strCajeroEmail = "usuario.cajero@gmail.com";
             string strCajeroPassword = "Pa55w.rd";
-            string strCajeroFirstName = "Usuario";
-            string strCajeroLastName = "Cajero";
+            string strCajeroNombre = "Usuario";
+            string strCajeroApellido = "Cajero";
 
             if (!(tryCreateRoleIfNotExist(roleManager, strAdministradorRole) &&
                 tryCreateRoleIfNotExist(roleManager, strGerenteRole) &&
                 tryCreateRoleIfNotExist(roleManager, strCajeroRole)))
                 return false;
 
-            if (!(tryCreateUserIfNotExistsAndAddRole(userManager, strAdministradorEmail, strAdministradorPassword, strAdministradorRole, strAdministradorFirstName, strAdministradorLastName) &&
-                tryCreateUserIfNotExistsAndAddRole(userManager, strGerenteEmail, strGerentePassword, strGerenteRole, strGerenteFirstName, strGerenteLastName) &&
-                tryCreateUserIfNotExistsAndAddRole(userManager, strCajeroEmail, strCajeroPassword, strCajeroRole, strCajeroFirstName, strCajeroLastName)))
+            if (!(tryCreateUserIfNotExistsAndAddRole(userManager, strAdministradorEmail, strAdministradorPassword, strAdministradorRole, strAdministradorNombre, strAdministradorApellido) &&
+                tryCreateUserIfNotExistsAndAddRole(userManager, strGerenteEmail, strGerentePassword, strGerenteRole, strGerenteNombre, strGerenteApellido) &&
+                tryCreateUserIfNotExistsAndAddRole(userManager, strCajeroEmail, strCajeroPassword, strCajeroRole, strCajeroNombre, strCajeroApellido)))
                 return false;
 
             return true;
@@ -82,7 +81,7 @@ namespace NOAM_ASISTENCIA.Server
             return true;
         }
 
-        private static bool tryCreateUserIfNotExistsAndAddRole(UserManager<ApplicationUser> userManager, string strEmail, string strPassword, string strRole, string strFirstName, string strLastName)
+        private static bool tryCreateUserIfNotExistsAndAddRole(UserManager<ApplicationUser> userManager, string strEmail, string strPassword, string strRole, string strNombre, string strApellido)
         {
             try
             {
@@ -93,12 +92,12 @@ namespace NOAM_ASISTENCIA.Server
                 {
                     oUser = new ApplicationUser()
                     {
-                        Id = Guid.NewGuid().ToString(),
+                        Id = Guid.NewGuid(),
                         UserName = strEmail,
                         Email = strEmail,
                         EmailConfirmed = true,
-                        FirstName = strFirstName,
-                        LastName = strLastName,
+                        Nombre = strNombre,
+                        Apellido = strApellido,
                         Lockout = false
                     };
 
@@ -115,40 +114,21 @@ namespace NOAM_ASISTENCIA.Server
 
             return true;
         }
-        /*
-        public static bool TrySeedDefaultData(FswDevContext dbcontext)
+
+        public static bool TrySeedDefaultData(ApplicationDbContext dbcontext)
         {
             try
             {
-                CreateCategoriaIfNotExists(dbcontext, 1, null, "Comidas");
-                CreateCategoriaIfNotExists(dbcontext, 2, null, "Bebidas");
-                CreateCategoriaIfNotExists(dbcontext, 3, null, "Snacks");
-                CreateCategoriaIfNotExists(dbcontext, 4, 2, "Refrescos");
+                CreateTurnoIfNotExists(dbcontext, 1, "Lunes a viernes de 8:00 a 14:00", "L - V | M");
+                CreateTurnoIfNotExists(dbcontext, 2, "Lunes a viernes de 14:00 a 22:00", "L - V | V");
+                dbcontext.SaveChangesWithIdentityInsert<Turno>();
 
-                CreateContactoTipoIfNotExists(dbcontext, 1, "Compra");
-
-                CreateInventarioStatusIfNotExists(dbcontext, 1, "En proceso");
-                CreateInventarioStatusIfNotExists(dbcontext, 2, "Concretada");
-                CreateInventarioStatusIfNotExists(dbcontext, 3, "Cancelada");
-
-                CreateTipoMonedumIfNotExists(dbcontext, 1, "MXN");
-                CreateTipoMonedumIfNotExists(dbcontext, 2, "USD");
-
-                CreateTipoPagoIfNotExists(dbcontext, 1, "Débito");
-                CreateTipoPagoIfNotExists(dbcontext, 1, "Tarjeta");
-
-                CreateUnidadMedidumIfNotExists(dbcontext, 1, "pza.");
-                CreateUnidadMedidumIfNotExists(dbcontext, 2, "ml.");
-                CreateUnidadMedidumIfNotExists(dbcontext, 3, "L.");
-                CreateUnidadMedidumIfNotExists(dbcontext, 4, "g.");
-                CreateUnidadMedidumIfNotExists(dbcontext, 5, "kg.");
-
-                CreateVentaStatusIfNotExists(dbcontext, 1, "En proceso");
-                CreateVentaStatusIfNotExists(dbcontext, 2, "Pago en Proceso");
-                CreateVentaStatusIfNotExists(dbcontext, 3, "Pago Concretado");
-                CreateVentaStatusIfNotExists(dbcontext, 4, "Cancelada");
-
-                CreateCajaIfNotExists(dbcontext, 1, "Caja 1");
+                CreateSucursalIfNotExists(dbcontext, 1, "3974 BOWLING MONTERREY");
+                CreateSucursalIfNotExists(dbcontext, 2, "4010 SMART FIT PLAZA TITAN MTY");
+                CreateSucursalIfNotExists(dbcontext, 3, "4011 SMART FIT MULTIPLAZA MTY");
+                CreateSucursalIfNotExists(dbcontext, 4, "4012 SMART FIT PLAZA FIESTA MTY");
+                CreateSucursalIfNotExists(dbcontext, 5, "4017 SMART FIT STA CATARINA MTY");
+                dbcontext.SaveChangesWithIdentityInsert<SucursalServicio>();
             }
             catch (Exception)
             {
@@ -157,28 +137,45 @@ namespace NOAM_ASISTENCIA.Server
 
             return true;
         }
-        
-        private static Categorium CreateCategoriaIfNotExists(FswDevContext dbcontext, int Id, int? padre, string descripcion)
+
+        private static Turno? CreateTurnoIfNotExists(ApplicationDbContext dbcontext, int id, string descripcion, string descripcionCorta)
         {
-            var obj = dbcontext.Categoria.Where(x => x.Id == Id);
+            var obj = dbcontext.Turnos.Where(x => x.Id == id);
 
             if (!obj.Any())
             {
-                Categorium o = new Categorium()
+                Turno o = new Turno()
                 {
+                    Id = id,
                     Descripcion = descripcion,
-                    Padre = padre,
-                    Status = true
+                    DescripcionCorta = descripcionCorta
                 };
 
-                dbcontext.Categoria.Add(o);
-                dbcontext.SaveChanges();
+                dbcontext.Turnos.Add(o);
 
                 return o;
             }
 
             return null;
         }
-        */
+        private static SucursalServicio? CreateSucursalIfNotExists(ApplicationDbContext dbcontext, int id, string descripcion)
+        {
+            var obj = dbcontext.SucursalServicios.Where(x => x.Id == id);
+
+            if (!obj.Any())
+            {
+                SucursalServicio o = new SucursalServicio()
+                {
+                    Id = id,
+                    Descripcion = descripcion
+                };
+
+                dbcontext.SucursalServicios.Add(o);
+
+                return o;
+            }
+
+            return null;
+        }
     }
 }
