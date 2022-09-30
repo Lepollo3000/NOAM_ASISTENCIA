@@ -1,8 +1,8 @@
-﻿@page "/RegistroAsistencia"
+﻿@page "/RegistroAsistencia/{SucursalId:int}"
 
 <h3>Asistencia</h3>
 
 @code {
     [Parameter]
-    public int MyProperty { get; set; }
+    public int SucursalId { get; set; }
 }

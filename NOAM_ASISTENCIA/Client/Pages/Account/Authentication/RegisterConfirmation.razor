@@ -1,0 +1,49 @@
+﻿@page "/account/register/emailconfirmation/{Username}/{UserEmail}/{ResendEmail}"
+@inject NavigationManager navigationManager
+
+<PageTitle>Confirme su cuenta</PageTitle>
+
+<div class="col justify-content-center p-5">
+    <div class="text-center">
+        <h1 class="text-gray-900 mb-4">Confirme su cuenta</h1>
+    </div>
+
+    <hr />
+
+    <p>
+        Su cuenta @Username ha sido registrada exitosamente, sin embargo aún falta un paso.
+    </p>
+    <p>
+        Revise el correo electrónico con el que registró esta cuenta (@UserEmail) y siga las indicaciones para confirmar su cuenta.
+    </p>
+    <p>
+        Puede cerrar esta ventana.
+    </p>
+
+    <div class="text-center">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+            Volver a Inicio
+        </a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Username { get; set; } = null!;
+
+    [Parameter]
+    public string UserEmail { get; set; } = null!;
+
+    [Parameter]
+    public string ResendEmail { get; set; } = null!;
+
+    private string Error { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(UserEmail))
+        {
+            navigationManager.NavigateTo("/");
+        }
+    }
+}

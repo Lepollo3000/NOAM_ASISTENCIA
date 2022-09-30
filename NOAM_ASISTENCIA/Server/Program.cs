@@ -1,9 +1,13 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NOAM_ASISTENCIA.Server;
 using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;
+using System.Text;
+using System.Xml.Linq;
 
 // Scaffold-DbContext "Server=localhost,1433;Database=NOAM_ASISTENCIA;User Id=sa;Password=Pa55w.rd" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -DataAnnotations -Force
 var builder = WebApplication.CreateBuilder(args);
@@ -24,8 +28,26 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
-builder.Services.AddAuthentication()
-    .AddIdentityServerJwt();
+// REGLAS PARA TOKEN DE AUTENTICACION
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(op =>
+    {
+        var configuration = builder.Configuration.GetSection("JwtBearer");
+
+        op.IncludeErrorDetails = true;
+        op.TokenValidationParameters = new TokenValidationParameters()
+        {
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["IssuerSigningKey"])),
+            ValidAudience = configuration["ValidAudience"],
+            ValidIssuer = configuration["ValidIssuer"],
+            RequireExpirationTime = Convert.ToBoolean(configuration["RequireExpirationTime"]),
+            RequireAudience = true,
+            ValidateIssuer = Convert.ToBoolean(configuration["ValidateIssuer"]),
+            ValidateAudience = Convert.ToBoolean(configuration["ValidateAudience"]),
+            ValidateLifetime = Convert.ToBoolean(configuration["ValidateLifetime"]),
+            ValidateIssuerSigningKey = Convert.ToBoolean(configuration["ValidateIssuerSigningKey"])
+        };
+    });
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

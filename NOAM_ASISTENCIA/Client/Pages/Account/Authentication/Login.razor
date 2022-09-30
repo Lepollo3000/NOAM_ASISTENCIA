@@ -1,0 +1,84 @@
+﻿@page "/account/login"
+@layout AuthLayout
+@inject NavigationManager navigationManager
+@inject IAccountService authService
+
+<PageTitle>Inicio de sesión</PageTitle>
+
+<div class="col">
+    <div class="p-5">
+        <div class="text-center">
+            <h1 class="h4 text-gray-900 mb-4">Inicio de sesión</h1>
+        </div>
+
+        <hr />
+
+        <EditForm Model="@LoginRequest" OnValidSubmit="@Submit">
+            <DataAnnotationsValidator />
+            <Blazorise.ValidationSummary />
+
+            <div class="form-group mb-3">
+                <label for="email">Nombre de usuario</label>
+                <InputText Id="email" Class="form-control" @bind-Value="@LoginRequest.UserName" />
+                <ValidationMessage For="@(() => LoginRequest.UserName)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="password">Contraseña</label>
+                <InputText Id="password" type="password" Class="form-control" @bind-Value="@LoginRequest.Password" />
+                <ValidationMessage For="@(() => LoginRequest.Password)" />
+            </div>
+
+            <div class="form-group mb-3 text-center">
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                <a href="/" class="btn btn-primary mx-auto">
+                    Volver a Inicio <i class="fa fa-home"></i>
+                </a>
+            </div>
+        </EditForm>
+
+        <hr />
+
+        <div class="text-center">
+            <a class="small" href="/account/forgotpassword">
+                ¿Se te olvidó la contraseña?
+            </a>
+        </div>
+
+        <div class="text-center">
+            <a class="small" href="/account/register">
+                ¿No cuentas con un usuario? ¡Regístrate!
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (ShowErrors)
+{
+    <div class="alert alert-danger" role="alert">
+        <p class="mb-0">@Error</p>
+    </div>
+}
+
+@code {
+    private LoginRequest LoginRequest { get; set; } = new LoginRequest();
+    private bool ShowErrors;
+    private string Error { get; set; } = "";
+
+    private async Task Submit()
+    {
+        ShowErrors = false;
+
+        var result = await authService.Login(LoginRequest);
+
+        if (result.Successful)
+        {
+            navigationManager.NavigateTo("/");
+        }
+        else
+        {
+            Error = result.Error;
+            ShowErrors = true;
+        }
+    }
+}

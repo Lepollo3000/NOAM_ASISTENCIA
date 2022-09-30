@@ -1,0 +1,91 @@
+﻿@page "/account/register/resendconfirmationemail/{UserId}"
+@layout AuthLayout
+@inject IAccountService authService
+@inject NavigationManager navigationManager
+
+<PageTitle>Confirmación de cuenta</PageTitle>
+
+<div class="col justify-content-center p-5">
+    <div class="text-center">
+        <h1 class="text-gray-900 mb-4">Confirmación de cuenta</h1>
+    </div>
+
+    <hr />
+
+    @if (!Successful)
+    {
+        if (ShowErrors)
+        {
+            <ul class="validation-errors" role="alert">
+                @foreach (var error in Errors)
+                {
+                    <li class="validation-message">@error</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>Cargando...</p>
+        }
+    }
+    else
+    {
+        <p>
+            Estimado/Estimada '@Username', el correo ha vuelto a enviarse a '@UserEmail'. Verifique su email y siga los pasos que se indiquen.
+        </p>
+        <p class="text-center">
+            Puede cerrar esta ventana.
+        </p>
+    }
+
+    <hr />
+
+    <div class="form-group text-center row mb-3">
+        <div class="col-6">
+            <a href="/" class="btn btn-primary">
+                Volver a Inicio <i class="fa fa-home"></i>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; }
+
+    private string Username;
+    private string UserEmail;
+
+    private bool Successful;
+    private bool ShowErrors = false;
+    private IEnumerable<string> Errors;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CheckIfParametersAreNull();
+
+        var model = new ResendEmailRequest() { UserId = UserId };
+        var result = await authService.ResendConfirmationEmail(model);
+
+        if (result.Successful)
+        {
+            Successful = result.Successful;
+            Username = result.Username;
+            UserEmail = result.UserEmail;
+        }
+        else
+        {
+            ShowErrors = false;
+            Errors = result.Errors;
+        }
+    }
+
+    private void CheckIfParametersAreNull()
+    {
+        if (string.IsNullOrEmpty(UserId))
+        {
+            navigationManager.NavigateTo("/");
+        }
+    }
+}
