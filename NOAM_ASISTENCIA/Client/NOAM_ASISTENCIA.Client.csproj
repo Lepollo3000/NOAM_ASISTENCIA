@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\css\bootstrap\dist\" />
+    <Folder Include="wwwroot\lib\" />
   </ItemGroup>
 
 </Project>
