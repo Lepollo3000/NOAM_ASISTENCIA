@@ -22,7 +22,7 @@ namespace NOAM_ASISTENCIA.Server
             return true;
         }
 
-        public static bool TryCreateDefaultUsersAndRoles(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static bool TryCreateDefaultUsersAndRoles(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             string strAdministradorRole = "Administrador";
             string strGerenteRole = "Gerente";
@@ -56,19 +56,19 @@ namespace NOAM_ASISTENCIA.Server
             return true;
         }
 
-        private static bool tryCreateRoleIfNotExist(RoleManager<IdentityRole> roleManager, string strRole)
+        private static bool tryCreateRoleIfNotExist(RoleManager<ApplicationRole> roleManager, string strRole)
         {
             try
             {
 #pragma warning disable CS8632 // La anotación para tipos de referencia que aceptan valores NULL solo debe usarse en el código dentro de un contexto de anotaciones "#nullable".
-                IdentityRole? oRole = roleManager.FindByNameAsync(strRole).Result;
+                ApplicationRole? oRole = roleManager.FindByNameAsync(strRole).Result;
 #pragma warning restore CS8632 // La anotación para tipos de referencia que aceptan valores NULL solo debe usarse en el código dentro de un contexto de anotaciones "#nullable".
 
                 if (oRole == null)
                 {
-                    oRole = new IdentityRole();
+                    oRole = new ApplicationRole();
                     oRole.Name = strRole;
-                    oRole.Id = Guid.NewGuid().ToString();
+                    oRole.Id = Guid.NewGuid();
 
                     roleManager.CreateAsync(oRole).Wait();
                 }

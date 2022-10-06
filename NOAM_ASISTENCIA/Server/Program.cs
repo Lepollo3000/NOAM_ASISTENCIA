@@ -21,7 +21,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole<Guid>>()
+    .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
@@ -37,11 +37,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         op.IncludeErrorDetails = true;
         op.TokenValidationParameters = new TokenValidationParameters()
         {
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["IssuerSigningKey"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["IssuerSigningKey"])),
             ValidAudience = configuration["ValidAudience"],
             ValidIssuer = configuration["ValidIssuer"],
             RequireExpirationTime = Convert.ToBoolean(configuration["RequireExpirationTime"]),
-            RequireAudience = true,
+            RequireAudience = Convert.ToBoolean(configuration["RequireAudience"]),
             ValidateIssuer = Convert.ToBoolean(configuration["ValidateIssuer"]),
             ValidateAudience = Convert.ToBoolean(configuration["ValidateAudience"]),
             ValidateLifetime = Convert.ToBoolean(configuration["ValidateLifetime"]),
@@ -72,7 +72,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbcontext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
     InitializeDb(dbcontext, userManager, roleManager);
 }
@@ -94,7 +94,7 @@ app.MapFallbackToFile("index.html");
 
 app.Run();
 
-static void InitializeDb(ApplicationDbContext dbcontext, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+static void InitializeDb(ApplicationDbContext dbcontext, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
 {
     InitDB.TryToMigrate(dbcontext);
     InitDB.TryCreateDefaultUsersAndRoles(userManager, roleManager);
