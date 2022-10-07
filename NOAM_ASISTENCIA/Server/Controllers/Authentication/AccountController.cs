@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text;
+using NOAM_ASISTENCIA.Server.Models.Utils.MailService.Interfaces;
 
 namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
 {
@@ -15,15 +16,17 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
     [ApiController]
     public class AccountController : ControllerBase
     {
+        private readonly IMailService _mailService;
         private readonly IConfiguration _configuration;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, IConfiguration configuration, SignInManager<ApplicationUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IMailService mailService, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _configuration = configuration;
             _signInManager = signInManager;
+            _mailService = mailService;
         }
 
         [HttpPost("[action]")]
@@ -100,10 +103,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                 var callbackUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}/account/register/confirmemail/{newUser.Id}/{code}";
                 callbackUrl = HtmlEncoder.Default.Encode(callbackUrl);
 
-                /*if (registerModel != null)
+                if (registerModel != null)
                     await _mailService.SendRegisterEmailAsync(registerModel, callbackUrl);
                 else if (resendModel != null)
-                    await _mailService.ResendConfirmationEmailAsync(newUser, callbackUrl);*/
+                    await _mailService.ResendConfirmationEmailAsync(newUser, callbackUrl);
 
                 return true;
             }
@@ -216,5 +219,4 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
             }
         }
     }
-
 }

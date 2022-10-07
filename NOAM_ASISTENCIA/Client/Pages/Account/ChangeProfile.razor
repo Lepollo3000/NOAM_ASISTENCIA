@@ -75,6 +75,18 @@
 
     private async Task HandleRegistration()
     {
+        ShowErrors = false;
 
+        var result = await authService.Register(ModelRequest);
+
+        if (result.Successful)
+        {
+            navigationManager.NavigateTo($"/account/register/emailconfirmation/{ModelRequest.Username}/{ModelRequest.Email}/{false}");
+        }
+        else
+        {
+            Errors = result.Errors;
+            ShowErrors = !result.Successful;
+        }
     }
 }

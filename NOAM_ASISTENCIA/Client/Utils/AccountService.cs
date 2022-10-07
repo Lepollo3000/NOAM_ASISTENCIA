@@ -25,7 +25,7 @@ namespace NOAM_ASISTENCIA.Client.Utils
             var response = await _httpClient.PostAsJsonAsync("api/account/register", model);
             var result = await response.Content.ReadFromJsonAsync<RegisterResult>();
 
-            return result!;
+            return result;
         }
         
         public async Task<ConfirmEmailResult> ConfirmEmail(ConfirmEmailRequest model)
@@ -33,7 +33,7 @@ namespace NOAM_ASISTENCIA.Client.Utils
             var response = await _httpClient.PostAsJsonAsync("api/account/confirmemail", model);
             var result = await response.Content.ReadFromJsonAsync<ConfirmEmailResult>();
 
-            return result!;
+            return result;
         }
 
         public async Task<ResendEmailResult> ResendConfirmationEmail(ResendEmailRequest model)
@@ -41,7 +41,7 @@ namespace NOAM_ASISTENCIA.Client.Utils
             var response = await _httpClient.PostAsJsonAsync("api/account/resendconfirmationemail", model);
             var result = await response.Content.ReadFromJsonAsync<ResendEmailResult>();
 
-            return result!;
+            return result;
         }
 
         public async Task<LoginResult> Login(LoginRequest model)
@@ -49,10 +49,10 @@ namespace NOAM_ASISTENCIA.Client.Utils
             var response = await _httpClient.PostAsJsonAsync("api/account/login", model);
             var result = await response.Content.ReadFromJsonAsync<LoginResult>();
 
-            if (result!.Successful)
+            if (result.Successful)
             {
                 await _localStorage.SetItemAsync("authToken", result.Token);
-                ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
+                ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
 
                 return result;
@@ -64,7 +64,7 @@ namespace NOAM_ASISTENCIA.Client.Utils
         public async Task Logout()
         {
             await _localStorage.RemoveItemAsync("authToken");
-            ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
+            ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
             _httpClient.DefaultRequestHeaders.Authorization = null;
         }
     }

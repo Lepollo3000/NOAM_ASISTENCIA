@@ -1,85 +1,10 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-
-@inject NavigationManager Navigation
-@inject SignOutSessionStateManager SignOutManager
-@inject HttpClient Http
-@inject AuthenticationStateProvider _authProvider
-
-<AuthorizeView>
+﻿<AuthorizeView>
     <Authorized>
-        <BarDropdown>
-            <BarDropdownToggle>
-                Opciones de usuario <Icon Name="@("fa-user")" />
-            </BarDropdownToggle>
-
-            <BarDropdownMenu Style="padding: 15px; min-width: 300px;" RightAligned="true">
-                <BarDropdownItem To="authentication/profile">
-                    <Row>
-                        <Column>
-                            Perfil de Usuario
-                        </Column>
-
-                        <Column ColumnSize="ColumnSize.Is3">
-                            <Icon Name="@("fa-user-circle")" />
-                        </Column>
-                    </Row>
-                </BarDropdownItem>
-
-                <BarDropdownItem @onclick="BeginSignOut">
-                    <Row>
-                        <Column>
-                            Cerrar Sesión
-                        </Column>
-
-                        <Column ColumnSize="ColumnSize.Is3">
-                            <Icon Name="@("fa-door-open")" />
-                        </Column>
-                    </Row>
-                </BarDropdownItem>
-            </BarDropdownMenu>
-        </BarDropdown>
+        <a href="account/profile/ejercicios">Ejercicios</a>
+        <a href="account/logout">Cerrar Sesión</a>
     </Authorized>
-
     <NotAuthorized>
-        <BarDropdown>
-            <BarDropdownToggle>
-                Iniciar sesión <Icon Name="@("fa-user")" />
-            </BarDropdownToggle>
-
-            <BarDropdownMenu Style="padding: 15px; min-width: 300px;" RightAligned="true">
-                <BarDropdownItem To="authentication/register">
-                    <Row>
-                        <Column>
-                            Registrarse
-                        </Column>
-
-                        <Column ColumnSize="ColumnSize.Is3">
-                            <Icon Name="@("fa-user-plus")" />
-                        </Column>
-                    </Row>
-                </BarDropdownItem>
-
-                <BarDropdownItem To="authentication/login">
-                    <Row>
-                        <Column>
-                            Iniciar Sesión
-                        </Column>
-
-                        <Column ColumnSize="ColumnSize.Is3">
-                            <Icon Name="@("fa-user-shield")" />
-                        </Column>
-                    </Row>
-                </BarDropdownItem>
-            </BarDropdownMenu>
-        </BarDropdown>
+        <a href="account/register">Registrar</a>
+        <a href="account/login">Iniciar Sesión</a>
     </NotAuthorized>
 </AuthorizeView>
-
-@code{
-    private async Task BeginSignOut(MouseEventArgs args)
-    {
-        await SignOutManager.SetSignOutState();
-        Navigation.NavigateTo("authentication/logout");
-    }
-}

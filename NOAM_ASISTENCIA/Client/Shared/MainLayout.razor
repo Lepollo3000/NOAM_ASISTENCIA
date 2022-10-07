@@ -36,24 +36,6 @@
                                 </BarDropdown>
                             </BarItem>
                         </AuthorizeView>
-
-                        <AuthorizeView Roles="Gerente">
-                            <BarItem>
-                                <BarDropdown>
-                                    <BarDropdownToggle>
-                                        Gerencia
-                                        <BarIcon IconName="@("fa-user-tie")" Style="float: right; margin-right: 20px;" />
-                                    </BarDropdownToggle>
-                                    <BarDropdownMenu>
-                                        <NavMenuGerente />
-                                    </BarDropdownMenu>
-                                </BarDropdown>
-                            </BarItem>
-                        </AuthorizeView>
-
-                        <AuthorizeView Roles="Cajero">
-                            <NavMenu />
-                        </AuthorizeView>
                     </BarStart>
                 </BarMenu>
             </Bar>

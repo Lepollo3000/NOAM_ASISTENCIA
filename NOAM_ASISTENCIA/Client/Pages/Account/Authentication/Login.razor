@@ -13,20 +13,20 @@
 
         <hr />
 
-        <EditForm Model="@LoginRequest" OnValidSubmit="@Submit">
+        <EditForm Model="@ModelRequest" OnValidSubmit="@Submit">
             <DataAnnotationsValidator />
             <Blazorise.ValidationSummary />
 
             <div class="form-group mb-3">
                 <label for="email">Nombre de usuario</label>
-                <InputText Id="email" Class="form-control" @bind-Value="@LoginRequest.UserName" />
-                <ValidationMessage For="@(() => LoginRequest.UserName)" />
+                <InputText Id="email" Class="form-control" @bind-Value="@ModelRequest.UserName" />
+                <ValidationMessage For="@(() => ModelRequest.UserName)" />
             </div>
 
             <div class="form-group mb-3">
                 <label for="password">Contraseña</label>
-                <InputText Id="password" type="password" Class="form-control" @bind-Value="@LoginRequest.Password" />
-                <ValidationMessage For="@(() => LoginRequest.Password)" />
+                <InputText Id="password" type="password" Class="form-control" @bind-Value="@ModelRequest.Password" />
+                <ValidationMessage For="@(() => ModelRequest.Password)" />
             </div>
 
             <div class="form-group mb-3 text-center">
@@ -61,7 +61,7 @@
 }
 
 @code {
-    private LoginRequest LoginRequest { get; set; } = new LoginRequest();
+    private LoginRequest ModelRequest { get; set; } = new LoginRequest();
     private bool ShowErrors;
     private string Error { get; set; } = "";
 
@@ -69,7 +69,7 @@
     {
         ShowErrors = false;
 
-        var result = await authService.Login(LoginRequest);
+        var result = await authService.Login(ModelRequest);
 
         if (result.Successful)
         {
