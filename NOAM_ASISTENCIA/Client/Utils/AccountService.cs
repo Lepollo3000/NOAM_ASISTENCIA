@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using NOAM_ASISTENCIA.Client.Utils.Interfaces;
 using NOAM_ASISTENCIA.Shared.Utils.AuthModels;
+using NOAM_ASISTENCIA.Shared.Utils;
 
 namespace NOAM_ASISTENCIA.Client.Utils
 {
@@ -20,40 +21,40 @@ namespace NOAM_ASISTENCIA.Client.Utils
             _localStorage = localStorage;
         }
 
-        public async Task<RegisterResult> Register(RegisterRequest model)
+        public async Task<ApiResponse> Register(RegisterRequest model)
         {
             var response = await _httpClient.PostAsJsonAsync("api/account/register", model);
-            var result = await response.Content.ReadFromJsonAsync<RegisterResult>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
 
-            return result;
+            return result!;
         }
         
-        public async Task<ConfirmEmailResult> ConfirmEmail(ConfirmEmailRequest model)
+        public async Task<ApiResponse> ConfirmEmail(ConfirmEmailRequest model)
         {
             var response = await _httpClient.PostAsJsonAsync("api/account/confirmemail", model);
-            var result = await response.Content.ReadFromJsonAsync<ConfirmEmailResult>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
 
-            return result;
+            return result!;
         }
 
-        public async Task<ResendEmailResult> ResendConfirmationEmail(ResendEmailRequest model)
+        public async Task<ApiResponse> ResendConfirmationEmail(ResendEmailRequest model)
         {
             var response = await _httpClient.PostAsJsonAsync("api/account/resendconfirmationemail", model);
-            var result = await response.Content.ReadFromJsonAsync<ResendEmailResult>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
 
-            return result;
+            return result!;
         }
 
-        public async Task<LoginResult> Login(LoginRequest model)
+        public async Task<ApiResponse> Login(LoginRequest model)
         {
             var response = await _httpClient.PostAsJsonAsync("api/account/login", model);
-            var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
 
-            if (result.Successful)
+            if (result!.Successful)
             {
-                await _localStorage.SetItemAsync("authToken", result.Token);
-                ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
+                await _localStorage.SetItemAsync("authToken", ((LoginResult)result.Result).Token);
+                ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(((LoginResult)result.Result).Token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", ((LoginResult)result.Result).Token);
 
                 return result;
             }

@@ -1,4 +1,4 @@
-﻿@page "/account/register/emailconfirmation/resend/{UserId}"
+﻿@page "/account/register/confirmedaccount/{UserId}/{Token}"
 @layout AuthLayout
 @inject IAccountService authService
 @inject NavigationManager navigationManager
@@ -21,26 +21,34 @@
                 {
                     <p class="mb-0">@error</p>
                 }
+
+                @if (IsTokenError)
+                {
+                    <p class="mb-0">Normalmente este error ocurre debido a que el token expiró. Puede intentar reenviar el correo de confirmación al correo con el que se registró su cuenta ('@UserEmail') dando clic en el siguiente enlace: <a class="text-black" href="/account/register/emailconfirmation/resend/@UserId">Reenviar correo de confirmación</a>.</p>
+                }
             </div>
         }
         else
         {
             <p>Cargando...</p>
         }
+
     }
     else
     {
-        <p>Estimado/Estimada '@Username', el correo ha vuelto a enviarse a '@UserEmail'. Verifique su email y siga los pasos que se indiquen.</p>
-        <p class="text-center">Puede cerrar esta ventana.</p>
+        <p>Su cuenta '@Username' ha sido confirmada de forma exitosa.</p>
+        <p>Apartir de ahora ya puede iniciar sesión en nuestra aplicación.</p>
     }
 
     <hr />
 
     <div class="form-group text-center row mb-3">
         <div class="col-6">
-            <a href="/" class="btn btn-primary">
-                Volver a Inicio <i class="fa fa-home"></i>
-            </a>
+            <a href="/account/login" class="btn btn-primary">Iniciar Sesión</a>
+        </div>
+
+        <div class="col-6">
+            <a href="/" class="btn btn-primary">Volver a Inicio <i class="fa fa-home"></i></a>
         </div>
 
     </div>
@@ -49,34 +57,41 @@
 @code {
     [Parameter]
     public string UserId { get; set; } = null!;
+    [Parameter]
+    public string Token { get; set; } = null!;
 
     private string Username = null!;
     private string UserEmail = null!;
 
-    private bool Successful;
+    private bool Successful = false;
     private bool ShowErrors = false;
+    private bool IsTokenError = false;
     private IEnumerable<string> Errors = null!;
 
     protected override async Task OnInitializedAsync()
     {
         CheckIfParametersAreNull();
 
-        ResendEmailRequest model = new ResendEmailRequest() { UserId = UserId };
-        ApiResponse result = await authService.ResendConfirmationEmail(model);
+        ConfirmEmailRequest model = new ConfirmEmailRequest() { Token = Token, UserId = UserId };
+        ApiResponse result = await authService.ConfirmEmail(model);
         ConfirmEmailResult modelResult = (result.Result as ConfirmEmailResult)!;
 
         if (modelResult != null)
         {
             if (result.Successful)
             {
-                Username = modelResult.Username;
                 UserEmail = modelResult.UserEmail;
+                Username = modelResult.Username;
                 Successful = true;
             }
             else
             {
-                ShowErrors = false;
+                IsTokenError = modelResult.IsTokenError;
+                UserEmail = modelResult.UserEmail;
+                Username = modelResult.Username;
                 Errors = result.ErrorMessages;
+                ShowErrors = true;
+                Successful = false;
             }
         }
         else
@@ -89,7 +104,7 @@
 
     private void CheckIfParametersAreNull()
     {
-        if (string.IsNullOrEmpty(UserId))
+        if (string.IsNullOrEmpty(UserId) || string.IsNullOrEmpty(Token))
         {
             navigationManager.NavigateTo("/");
         }

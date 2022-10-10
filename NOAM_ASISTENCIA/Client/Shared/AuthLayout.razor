@@ -1,23 +1,21 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="container">
+<Div Class="page">
+    <Container Class="container">
         <!-- ===================== Fila Externa ===================== -->
-        <div class="row justify-content-center d-flex align-items-center min-vh-100">
-            <div class="col-lg-8 col-md-9">
-                <div class="card o-hidden border-0 shadow-lg">
+        <Row Class="row justify-content-center d-flex align-items-center min-vh-100">
+            <Column ColumnSize="ColumnSize.Is8.OnWidescreen.Is9">
+                <Card Border="Border.Is0" Shadow="Shadow.Large" Class="o-hidden border-0 shadow-lg">
                     <!-- ===================== Carta Centrada ===================== -->
-                    <div class="card-body p-0">
-                        <div class="row">
+                    <CardBody Padding="Padding.Is0">
                             <main>
                                 <article class="content px-4">
                                     @Body
                                 </article>
                             </main>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                    </CardBody>
+                </Card>
+            </Column>
+        </Row>
+    </Container>
+</Div>

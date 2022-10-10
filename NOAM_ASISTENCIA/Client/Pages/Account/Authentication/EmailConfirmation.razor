@@ -10,15 +10,9 @@
 
     <hr />
 
-    <p>
-        Su cuenta @Username ha sido registrada exitosamente, sin embargo aún falta un paso.
-    </p>
-    <p>
-        Revise el correo electrónico con el que registró esta cuenta (@UserEmail) y siga las indicaciones para confirmar su cuenta.
-    </p>
-    <p>
-        Puede cerrar esta ventana.
-    </p>
+    <p>Su cuenta @Username ha sido registrada exitosamente, sin embargo aún falta un paso.</p>
+    <p>Revise el correo electrónico con el que registró esta cuenta (@UserEmail) y siga las indicaciones para confirmar su cuenta.</p>
+    <p>Puede cerrar esta ventana.</p>
 
     <div class="text-center">
         <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
@@ -30,10 +24,8 @@
 @code {
     [Parameter]
     public string Username { get; set; } = null!;
-
     [Parameter]
     public string UserEmail { get; set; } = null!;
-
     [Parameter]
     public string ResendEmail { get; set; } = null!;
 

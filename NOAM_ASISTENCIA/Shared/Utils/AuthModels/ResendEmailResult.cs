@@ -8,9 +8,7 @@ namespace NOAM_ASISTENCIA.Shared.Utils.AuthModels
 {
     public class ResendEmailResult
     {
-        public bool Successful { get; set; }
         public string Username { get; set; } = null!;
         public string UserEmail { get; set; } = null!;
-        public IEnumerable<string> Errors { get; set; } = null!;
     }
 }

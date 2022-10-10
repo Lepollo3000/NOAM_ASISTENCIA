@@ -71,16 +71,15 @@
 
 
 @code {
-
     private RegisterRequest RegisterRequest = new RegisterRequest();
     private bool ShowErrors;
-    private IEnumerable<string> Errors;
+    private IEnumerable<string> Errors = null!;
 
     private async Task HandleRegistration()
     {
         ShowErrors = false;
 
-        var result = await authService.Register(RegisterRequest);
+        ApiResponse result = await authService.Register(RegisterRequest);
 
         if (result.Successful)
         {
@@ -88,9 +87,8 @@
         }
         else
         {
-            Errors = result.Errors;
-            ShowErrors = !result.Successful;
+            Errors = result.ErrorMessages;
+            ShowErrors = true;
         }
     }
-
 }

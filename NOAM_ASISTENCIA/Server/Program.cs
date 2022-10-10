@@ -2,10 +2,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NOAM_ASISTENCIA.Server;
 using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;
+using NOAM_ASISTENCIA.Server.Models.Utils.Mail;
+using NOAM_ASISTENCIA.Server.Models.Utils.MailService;
+using NOAM_ASISTENCIA.Server.Models.Utils.MailService.Interfaces;
 using System.Text;
 using System.Xml.Linq;
 
@@ -48,6 +52,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = Convert.ToBoolean(configuration["ValidateIssuerSigningKey"])
         };
     });
+
+// CONFIGURACIONES DE ENVIO CORREOS DESDE USER SECRETS
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddSingleton(x => x.GetRequiredService<IOptions<MailSettings>>().Value);
+
+builder.Services.AddTransient<IMailService, MailService>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

@@ -28,7 +28,7 @@
                 }
 
                 <DataAnnotationsValidator />
-                <Blazorise.ValidationSummary />
+                <Microsoft.AspNetCore.Components.Forms.ValidationSummary />
 
                 <div class="form-group mb-3">
                     <label for="username">Nombre de usuario</label>
@@ -77,7 +77,7 @@
     {
         ShowErrors = false;
 
-        var result = await authService.Register(ModelRequest);
+        ApiResponse result = await authService.Register(ModelRequest);
 
         if (result.Successful)
         {
@@ -85,8 +85,8 @@
         }
         else
         {
-            Errors = result.Errors;
-            ShowErrors = !result.Successful;
+            Errors = result.ErrorMessages;
+            ShowErrors = true;
         }
     }
 }
