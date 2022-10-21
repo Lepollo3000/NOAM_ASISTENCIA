@@ -5,90 +5,155 @@
 
 <PageTitle>Registro de usuario</PageTitle>
 
-<div class="col">
-    <div class="p-5">
-        <div class="text-center">
-            <h1 class="h4 text-gray-900 mb-4">Registro de usuario</h1>
-        </div>
+<Div TextAlignment="TextAlignment.Center" Margin="Margin.Is3.FromBottom">
+    <Heading Size="HeadingSize.Is3" TextColor="TextColor.Black50" Margin="Margin.Is4.FromBottom">Registro de usuario</Heading>
+</Div>
 
-        <hr />
+<Divider />
 
-        <EditForm Model="@RegisterRequest" OnValidSubmit="@HandleRegistration">
-            @if (ShowErrors)
-            {
-                <div class="alert alert-danger" role="alert">
-                    @foreach (var error in Errors)
-                    {
-                        <p class="mb-0">@error</p>
-                    }
-                </div>
-            }
-            <DataAnnotationsValidator />
-            <Blazorise.ValidationSummary />
+<Row>
+    <Column>
+        @if (showErrors)
+        {
+            <Alert Color="Color.Danger" role="alert">
+                @foreach (var error in errors)
+                {
+                    <Paragraph class="mb-0">@error</Paragraph>
+                }
+            </Alert>
+        }
 
-            <div class="form-group mb-3">
-                <label for="username">Nombre de usuario</label>
-                <InputText Id="username" Class="form-control" @bind-Value="@RegisterRequest.Username" />
-                <ValidationMessage For="@(() => RegisterRequest.Username)" />
-            </div>
+        <Validations @ref="validationsRef" Model="@modelRequest" Mode="ValidationMode.Auto" ValidateOnLoad="false">
+            <ValidationSummary />
 
-            <div class="form-group mb-3">
-                <label for="email">Correo electrónico</label>
-                <InputText Id="email" Class="form-control" @bind-Value="@RegisterRequest.Email" />
-                <ValidationMessage For="@(() => RegisterRequest.Email)" />
-            </div>
+            <Validation>
+                <Field Margin="Margin.Is3.FromBottom">
+                    <FieldLabel For="@modelRequest.UserName">Nombre de Usuario</FieldLabel>
+                    <FieldBody>
+                        <TextEdit Placeholder="Nombre de Usuario" @bind-Text="@modelRequest.UserName">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </FieldBody>
+                </Field>
+            </Validation>
 
-            <div class="form-group mb-3">
-                <label for="password">Contraseña</label>
-                <InputText type="password" Id="password" Class="form-control" @bind-Value="@RegisterRequest.Password" />
-                <ValidationMessage For="@(() => RegisterRequest.Password)" />
-            </div>
+            <Validation>
+                <Field Margin="Margin.Is3.FromBottom">
+                    <FieldLabel For="@modelRequest.Email">Correo Electrónico</FieldLabel>
+                    <FieldBody>
+                        <TextEdit Placeholder="Correo Electrónico" @bind-Text="@modelRequest.Email">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </FieldBody>
+                </Field>
+            </Validation>
 
-            <div class="form-group mb-3">
-                <label for="password">Confirmar contraseña</label>
-                <InputText type="password" Id="password" Class="form-control" @bind-Value="@RegisterRequest.ConfirmPassword" />
-                <ValidationMessage For="@(() => RegisterRequest.ConfirmPassword)" />
-            </div>
+            <Validation>
+                <Field Margin="Margin.Is3.FromBottom">
+                    <FieldLabel For="@modelRequest.Nombres">Nombre(s)</FieldLabel>
+                    <FieldBody>
+                        <TextEdit Placeholder="Nombre(s)" @bind-Text="@modelRequest.Nombres">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </FieldBody>
+                </Field>
+            </Validation>
 
-            <div class="form-group mb-3 text-center">
-                <button type="submit" class="btn btn-primary">Crear cuenta</button>
-                <a href="/" class="btn btn-primary mx-auto">
-                    Volver a Inicio <i class="fa fa-home"></i>
-                </a>
-            </div>
-        </EditForm>
+            <Validation>
+                <Field Margin="Margin.Is3.FromBottom">
+                    <FieldLabel For="@modelRequest.Apellidos">Apellidos(s)</FieldLabel>
+                    <FieldBody>
+                        <TextEdit Placeholder="Apellidos(s)" @bind-Text="@modelRequest.Apellidos">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </FieldBody>
+                </Field>
+            </Validation>
 
-        <hr />
+            <Validation>
+                <Field Margin="Margin.Is3.FromBottom">
+                    <FieldLabel For="@modelRequest.Password">Contraseña</FieldLabel>
+                    <FieldBody>
+                        <TextEdit Role="TextRole.Password" Placeholder="Contraseña" @bind-Text="@modelRequest.Password">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </FieldBody>
+                </Field>
+            </Validation>
 
-        <div class="text-center">
-            <a class="small" href="/account/login">
-                ¿Ya cuentas con un usuario y contraseña? ¡Inicia sesión!
-            </a>
-        </div>
-    </div>
-</div>
+            <Validation>
+                <Field Margin="Margin.Is3.FromBottom">
+                    <FieldLabel For="@modelRequest.ConfirmPassword">Confirmar Contraseña</FieldLabel>
+                    <FieldBody>
+                        <TextEdit Role="TextRole.Password" Placeholder="Confirmar Contraseña" @bind-Text="@modelRequest.ConfirmPassword">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </FieldBody>
+                </Field>
+            </Validation>
 
+            <Row Margin="Margin.Is3.FromBottom" Flex="Flex.JustifyContent.Center">
+                <Column ColumnSize="ColumnSize.Is6.OnTablet" Margin="Margin.Is3.FromBottom">
+                    <Button Clicked="@HandleSubmit" Color="Color.Primary" Width="Width.Is100">Crear cuenta</Button>
+                </Column>
 
+                <Column ColumnSize="ColumnSize.Is6.OnTablet" Margin="Margin.Is3.FromBottom">
+                    <Button To="/" Type="ButtonType.Link" Color="Color.Primary" Width="Width.Is100">Volver a Inicio <Icon Name="@("fa-home")" /></Button>
+                </Column>
+            </Row>
+        </Validations>
+    </Column>
+</Row>
+
+<Divider />
+
+<Div TextAlignment="TextAlignment.Center" Margin="Margin.Is3.FromBottom">
+    <Anchor To="/account/login">¿Ya cuentas con un usuario y contraseña? ¡Inicia sesión!</Anchor>
+</Div>
 
 @code {
-    private RegisterRequest RegisterRequest = new RegisterRequest();
-    private bool ShowErrors;
-    private IEnumerable<string> Errors = null!;
+    private Validations validationsRef = new Validations();
+    private RegisterRequest modelRequest = new RegisterRequest();
 
-    private async Task HandleRegistration()
+    private bool showErrors;
+    private bool showTurnos;
+    private IEnumerable<Turno> turno = null!;
+    private IEnumerable<string> errors = null!;
+
+    private async Task HandleSubmit()
     {
-        ShowErrors = false;
+        if (await validationsRef.ValidateAll())
+        {
+            await Submit();
+        }
+    }
 
-        ApiResponse result = await authService.Register(RegisterRequest);
+    private async Task Submit()
+    {
+        showErrors = false;
+
+        ApiResponse result = await authService.Register(modelRequest);
 
         if (result.Successful)
         {
-            navigationManager.NavigateTo($"/account/register/emailconfirmation/{RegisterRequest.Username}/{RegisterRequest.Email}/{false}");
+            navigationManager.NavigateTo($"/account/register/emailconfirmation/{modelRequest.UserName}/{modelRequest.Email}/{false}");
         }
         else
         {
-            Errors = result.ErrorMessages;
-            ShowErrors = true;
+            errors = result.ErrorMessages;
+            showErrors = true;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-//using NOAM_ASISTENCIA.Shared.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,7 +16,7 @@ namespace NOAM_ASISTENCIA.Server.Models
         [Required]
         public string Apellido { get; set; } = null!;
         [Required]
-        public int? IdTurno { get; set; }
+        public int IdTurno { get; set; }
         [Required]
         public bool Lockout { get; set; }
         [Required]

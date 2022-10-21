@@ -16,7 +16,7 @@
 
             <hr />
 
-            <EditForm Model="@ModelRequest" OnValidSubmit="@HandleRegistration">
+            @*<EditForm Model="@ModelRequest" OnValidSubmit="@HandleRegistration">
                 @if (ShowErrors)
                 {
                     <div class="alert alert-danger" role="alert">
@@ -32,8 +32,8 @@
 
                 <div class="form-group mb-3">
                     <label for="username">Nombre de usuario</label>
-                    <InputText Id="username" Class="form-control" @bind-Value="@ModelRequest.Username" />
-                    <ValidationMessage For="@(() => ModelRequest.Username)" />
+                    <InputText Id="username" Class="form-control" @bind-Value="@ModelRequest.UserName" />
+                    <ValidationMessage For="@(() => ModelRequest.UserName)" />
                 </div>
 
                 <div class="form-group mb-3">
@@ -63,7 +63,7 @@
                         Volver a Inicio <i class="fa fa-home"></i>
                     </a>
                 </div>
-            </EditForm>
+        </EditForm>*@
         </div>
     </div>
 }
@@ -81,7 +81,7 @@
 
         if (result.Successful)
         {
-            navigationManager.NavigateTo($"/account/register/emailconfirmation/{ModelRequest.Username}/{ModelRequest.Email}/{false}");
+            navigationManager.NavigateTo($"/account/register/emailconfirmation/{ModelRequest.UserName}/{ModelRequest.Email}/{false}");
         }
         else
         {

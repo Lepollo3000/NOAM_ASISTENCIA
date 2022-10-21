@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using Duende.IdentityServer.EntityFramework.Options;
-using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
-using Microsoft.AspNetCore.Identity;
+﻿using Duende.IdentityServer.EntityFramework.Options;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Options;
 using NOAM_ASISTENCIA.Server.Models;
 using NOAM_ASISTENCIA.Server.Models.Utils;
 
 namespace NOAM_ASISTENCIA.Server.Data
 {
-    public partial class ApplicationDbContext : CustomApiAuthorizationDbContext<ApplicationUser>
+    public partial class ApplicationDbContext : KeyApiAuthorizationDbContext<ApplicationUser, ApplicationRole, Guid>
     {
-        public ApplicationDbContext(
-            DbContextOptions options,
-            IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
+        public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
         {
         }
 
@@ -49,7 +42,7 @@ namespace NOAM_ASISTENCIA.Server.Data
                 entity.HasOne(d => d.IdTurnoNavigation)
                     .WithMany(p => p.ApplicationUsers)
                     .HasForeignKey(d => d.IdTurno)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.NoAction)
                     .HasConstraintName("FK_Usuario_Turno");
             });
 

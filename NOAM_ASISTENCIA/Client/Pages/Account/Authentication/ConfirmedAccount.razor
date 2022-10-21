@@ -5,54 +5,54 @@
 
 <PageTitle>Confirmación de cuenta</PageTitle>
 
-<div class="col justify-content-center p-5">
-    <div class="text-center">
-        <h1 class="text-gray-900 mb-4">Confirmación de cuenta</h1>
-    </div>
+<Column Flex="Flex.JustifyContent.Center" Padding="Padding.Is5">
+    <Div TextAlignment="TextAlignment.Center">
+        <DisplayHeading Size="DisplayHeadingSize.Is4" TextColor="TextColor.Black50" Margin="Margin.Is4.FromBottom">Confirmación de cuenta</DisplayHeading>
+    </Div>
 
-    <hr />
+    <Divider />
 
-    @if (!Successful)
+    @if (!successful)
     {
-        if (ShowErrors)
+        if (showErrors)
         {
-            <div class="alert alert-danger" role="alert">
-                @foreach (var error in Errors)
+            <Alert Color="Color.Danger" role="alert">
+                @foreach (var error in errors)
                 {
-                    <p class="mb-0">@error</p>
+                    <Paragraph class="mb-0">@error</Paragraph>
                 }
 
-                @if (IsTokenError)
+                @if (isTokenError)
                 {
-                    <p class="mb-0">Normalmente este error ocurre debido a que el token expiró. Puede intentar reenviar el correo de confirmación al correo con el que se registró su cuenta ('@UserEmail') dando clic en el siguiente enlace: <a class="text-black" href="/account/register/emailconfirmation/resend/@UserId">Reenviar correo de confirmación</a>.</p>
+                    <Paragraph class="mb-0">Normalmente este error ocurre debido a que el token expiró. Puede intentar reenviar el correo de confirmación al correo con el que se registró su cuenta ('@userEmail') dando clic en el siguiente enlace:</Paragraph>
+                    <Anchor TextColor="TextColor.Black50" To="@linkCorreoConfirmacion">Reenviar correo de confirmación</Anchor>
                 }
-            </div>
+            </Alert>
         }
         else
         {
-            <p>Cargando...</p>
+            <Paragraph>Cargando...</Paragraph>
         }
 
     }
     else
     {
-        <p>Su cuenta '@Username' ha sido confirmada de forma exitosa.</p>
-        <p>Apartir de ahora ya puede iniciar sesión en nuestra aplicación.</p>
+        <Paragraph>Su cuenta '@username' ha sido confirmada de forma exitosa.</Paragraph>
+        <Paragraph>Apartir de ahora ya puede iniciar sesión en nuestra aplicación.</Paragraph>
     }
 
-    <hr />
+    <Divider />
 
-    <div class="form-group text-center row mb-3">
-        <div class="col-6">
-            <a href="/account/login" class="btn btn-primary">Iniciar Sesión</a>
-        </div>
+    <Field TextAlignment="TextAlignment.Center" Margin="Margin.Is3.FromBottom">
+        <Column ColumnSize="ColumnSize.Is6">
+            <Button To="/account/login" Color="Color.Primary">Iniciar Sesión</Button>
+        </Column>
 
-        <div class="col-6">
-            <a href="/" class="btn btn-primary">Volver a Inicio <i class="fa fa-home"></i></a>
-        </div>
-
-    </div>
-</div>
+        <Column ColumnSize="ColumnSize.Is6">
+            <Button To="/" Color="Color.Primary">Volver a Inicio <Icon Name="@("fa-home")" /></Button>
+        </Column>
+    </Field>
+</Column>
 
 @code {
     [Parameter]
@@ -60,13 +60,15 @@
     [Parameter]
     public string Token { get; set; } = null!;
 
-    private string Username = null!;
-    private string UserEmail = null!;
+    private string linkCorreoConfirmacion = "/account/register/emailconfirmation/resend/@UserId";
 
-    private bool Successful = false;
-    private bool ShowErrors = false;
-    private bool IsTokenError = false;
-    private IEnumerable<string> Errors = null!;
+    private string username = null!;
+    private string userEmail = null!;
+
+    private bool successful = false;
+    private bool showErrors = false;
+    private bool isTokenError = false;
+    private IEnumerable<string> errors = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,25 +82,25 @@
         {
             if (result.Successful)
             {
-                UserEmail = modelResult.UserEmail;
-                Username = modelResult.Username;
-                Successful = true;
+                userEmail = modelResult.UserEmail;
+                username = modelResult.Username;
+                successful = true;
             }
             else
             {
-                IsTokenError = modelResult.IsTokenError;
-                UserEmail = modelResult.UserEmail;
-                Username = modelResult.Username;
-                Errors = result.ErrorMessages;
-                ShowErrors = true;
-                Successful = false;
+                isTokenError = modelResult.IsTokenError;
+                userEmail = modelResult.UserEmail;
+                username = modelResult.Username;
+                errors = result.ErrorMessages;
+                showErrors = true;
+                successful = false;
             }
         }
         else
         {
-            Errors = new List<string>() { "Error inesperado. Inténtelo de nuevo más tarde." };
-            ShowErrors = true;
-            Successful = false;
+            errors = new List<string>() { "Error inesperado. Inténtelo de nuevo más tarde." };
+            showErrors = true;
+            successful = false;
         }
     }
 

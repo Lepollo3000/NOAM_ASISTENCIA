@@ -37,17 +37,17 @@ namespace NOAM_ASISTENCIA.Server.Models.Utils
         /// <summary>
         /// Gets or sets the <see cref="DbSet{PersistedGrant}"/>.
         /// </summary>
-        public DbSet<PersistedGrant> PersistedGrants { get; set; }
+        public DbSet<PersistedGrant> PersistedGrants { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the <see cref="DbSet{DeviceFlowCodes}"/>.
         /// </summary>
-        public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
+        public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the <see cref="DbSet{Key}"/>.
         /// </summary>
-        public DbSet<Key> Keys { get; set; }
+        public DbSet<Key> Keys { get; set; } = null!;
 
         Task<int> IPersistedGrantDbContext.SaveChangesAsync() => base.SaveChangesAsync();
 

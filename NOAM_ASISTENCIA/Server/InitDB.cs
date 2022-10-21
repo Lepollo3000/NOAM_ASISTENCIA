@@ -96,6 +96,7 @@ namespace NOAM_ASISTENCIA.Server
                         UserName = strEmail,
                         Email = strEmail,
                         EmailConfirmed = true,
+                        IdTurno = 1,
                         Nombre = strNombre,
                         Apellido = strApellido,
                         Lockout = false
@@ -119,8 +120,9 @@ namespace NOAM_ASISTENCIA.Server
         {
             try
             {
-                CreateTurnoIfNotExists(dbcontext, 1, "Lunes a viernes de 8:00 a 14:00", "L - V | M");
-                CreateTurnoIfNotExists(dbcontext, 2, "Lunes a viernes de 14:00 a 22:00", "L - V | V");
+                CreateTurnoIfNotExists(dbcontext, 1, "Ninguno", "Ninguno");
+                CreateTurnoIfNotExists(dbcontext, 2, "Lunes a viernes de 8:00 a 14:00", "L - V | M");
+                CreateTurnoIfNotExists(dbcontext, 3, "Lunes a viernes de 14:00 a 22:00", "L - V | V");
                 dbcontext.SaveChangesWithIdentityInsert<Turno>();
 
                 CreateSucursalIfNotExists(dbcontext, 1, "3974 BOWLING MONTERREY");
@@ -130,7 +132,7 @@ namespace NOAM_ASISTENCIA.Server
                 CreateSucursalIfNotExists(dbcontext, 5, "4017 SMART FIT STA CATARINA MTY");
                 dbcontext.SaveChangesWithIdentityInsert<SucursalServicio>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }

@@ -48,7 +48,7 @@ namespace NOAM_ASISTENCIA.Server.Models.Utils.MailService
 
         public async Task SendRegisterEmailAsync(RegisterRequest request, string redirectUrl)
         {
-            await SendEmailAsync(request.Username, request.Email, redirectUrl);
+            await SendEmailAsync(request.UserName, request.Email, redirectUrl);
         }
 
         public async Task ResendConfirmationEmailAsync(ApplicationUser request, string redirectUrl)

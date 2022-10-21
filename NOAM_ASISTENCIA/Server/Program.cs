@@ -107,6 +107,6 @@ app.Run();
 static void InitializeDb(ApplicationDbContext dbcontext, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
 {
     InitDB.TryToMigrate(dbcontext);
-    InitDB.TryCreateDefaultUsersAndRoles(userManager, roleManager);
     InitDB.TrySeedDefaultData(dbcontext);
+    InitDB.TryCreateDefaultUsersAndRoles(userManager, roleManager);
 }

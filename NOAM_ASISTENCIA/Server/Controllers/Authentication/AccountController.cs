@@ -35,7 +35,14 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
         {
             try
             {
-                var newUser = new ApplicationUser { UserName = model.Username, Email = model.Email };
+                var newUser = new ApplicationUser
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    Nombre = model.Nombres,
+                    Apellido = model.Apellidos,
+                    IdTurno = model.IdTurno
+                };
                 var result = await _userManager.CreateAsync(newUser, model.Password);
 
                 if (!result.Succeeded)
@@ -202,11 +209,55 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
         {
             try
             {
-                var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, false, false);
+                // INTENTA OBTENER EL USUARIO CON EL NOMBRE DE USUARIO DADO
+                var user = await _userManager.FindByNameAsync(model.UserName);
 
-                if (!result.Succeeded)
+                if (user != null)
+                {
+                    // SI EL USUARIO ESTA BLOQUEADO POR UN ADMINISTRADOR
+                    if (user.Lockout)
+                    {
+                        var errors = new List<string>() { "No se pudo iniciar la sesión. Contacte a un administrador." };
+
+                        var forbiddenResponseModel = new ApiResponse()
+                        {
+                            Successful = false,
+                            Result = new LoginResult(),
+                            ErrorMessages = errors
+                        };
+
+                        // FORBIDDEN
+                        return StatusCode(403, forbiddenResponseModel);
+                    }
+
+                    // INTENTA INICIAR SESION CON LAS CREDENCIALES DADAS
+                    var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, false);
+
+                    if (!result.Succeeded)
+                    {
+                        var errors = new List<string>();
+
+                        if (result.IsLockedOut)
+                            errors.Add("Ya no tiene más intentos por ahora. Espere un momento e intente de nuevo.");
+                        else if (result.IsNotAllowed)
+                            errors.Add("Su cuenta aún no ha sido confirmada. Póngase en contacto con un administrador para más información.");
+                        else
+                            errors.Add("Credenciales inválidas. Verifique que se hayan ingresado correctamente.");
+
+                        var badRequestResponseModel = new ApiResponse()
+                        {
+                            Successful = false,
+                            Result = new LoginResult(),
+                            ErrorMessages = errors
+                        };
+
+                        return BadRequest(badRequestResponseModel);
+                    }
+                }
+                else
                 {
                     var errors = new List<string>() { "Credenciales inválidas. Verifique que se hayan ingresado correctamente." };
+
                     var badRequestResponseModel = new ApiResponse()
                     {
                         Successful = false,
@@ -217,9 +268,9 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     return BadRequest(badRequestResponseModel);
                 }
 
-                // OBTIENE USUARIO, ROLES Y DEMAS PARA GENERAR LOS CLAIMS
-                var user = await _userManager.FindByNameAsync(model.UserName);
-                var roles = await _userManager.GetRolesAsync(user);
+
+                // OBTIENE EL USUARIO Y ROLES PARA GENERAR LOS CLAIMS
+                var roles = await _userManager.GetRolesAsync(user!);
                 var claims = new List<Claim>();
 
                 claims.Add(new Claim(ClaimTypes.Name, model.UserName));
@@ -230,16 +281,19 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                 }
 
                 // SE GENERA EL TOKEN DE SESION USANDO LAS CREDENCIALES Y CLAIMS PARA DESPUES ENVIARLO AL CLIENTE
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSecurityKey"]));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                var expiry = DateTime.Now.AddDays(Convert.ToInt32(_configuration["JwtExpiryInDays"]));
+                var config = _configuration.GetSection("JwtBearer");
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["IssuerSigningKey"]));
+                var credencials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var expiry = DateTime.Now.AddDays(Convert.ToInt32(config["JwtExpiryInDays"]));
                 var token = new JwtSecurityToken(
-                    _configuration["JwtIssuer"],
-                    _configuration["JwtAudience"],
+                    config["ValidIssuer"],
+                    config["ValidAudience"],
                     claims,
                     expires: expiry,
-                    signingCredentials: creds
+                    signingCredentials: credencials
                 );
+
                 var okResponseModel = new ApiResponse()
                 {
                     Successful = true,

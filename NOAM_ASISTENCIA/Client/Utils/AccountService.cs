@@ -28,7 +28,7 @@ namespace NOAM_ASISTENCIA.Client.Utils
 
             return result!;
         }
-        
+
         public async Task<ApiResponse> ConfirmEmail(ConfirmEmailRequest model)
         {
             var response = await _httpClient.PostAsJsonAsync("api/account/confirmemail", model);
@@ -52,9 +52,12 @@ namespace NOAM_ASISTENCIA.Client.Utils
 
             if (result!.Successful)
             {
-                await _localStorage.SetItemAsync("authToken", ((LoginResult)result.Result).Token);
-                ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(((LoginResult)result.Result).Token);
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", ((LoginResult)result.Result).Token);
+                if (result.Result is LoginResult resultModel)
+                {
+                    await _localStorage.SetItemAsync("authToken", resultModel.Token);
+                    ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(resultModel.Token);
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", resultModel.Token);
+                }
 
                 return result;
             }

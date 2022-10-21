@@ -5,68 +5,111 @@
 
 <PageTitle>Inicio de sesión</PageTitle>
 
-<Column>
-    <Div Class="p-5">
-        <Div Class="text-center">
-            <h1 class="h4 text-gray-900 mb-4">Inicio de sesión</h1>
-        </Div>
+<Div TextAlignment="TextAlignment.Center" Margin="Margin.Is3.FromBottom">
+    <Heading Size="HeadingSize.Is3" TextColor="TextColor.Black50" Margin="Margin.Is4.FromBottom">Inicio de sesión</Heading>
+</Div>
 
-        <hr />
+<Divider />
 
-        <EditForm Model="@ModelRequest" OnValidSubmit="@Submit">
-            <DataAnnotationsValidator />
-            <Blazorise.ValidationSummary />
+<Row>
+    <Column>
+        <Alert Color="Color.Danger" @bind-Visible="showErrors">
+            @if (showErrors)
+            {
+                @foreach (var error in errors)
+                {
+                    <Paragraph class="mb-0">@error</Paragraph>
+                }
+            }
+        </Alert>
 
-            <Div Class="form-group mb-3">
-                <Label For="email">Nombre de usuario</Label>
-                <InputText id="email" class="form-control" @bind-Value="@ModelRequest.UserName" />
-                <ValidationMessage For="@(() => ModelRequest.UserName)" />
-            </Div>
+        <Row>
+            <Column>
+                <Validations @ref="validationsRef" Model="@modelRequest" Mode="ValidationMode.Auto" ValidateOnLoad="false">
+                    <ValidationSummary />
 
-            <Div Class="form-group mb-3">
-                <Label For="password">Contraseña</Label>
-                <InputText id="password" type="password" class="form-control" @bind-Value="@ModelRequest.Password" />
-                <ValidationMessage For="@(() => ModelRequest.Password)" />
-            </Div>
+                    <Validation>
+                        <Field Margin="Margin.Is3.FromBottom">
+                            <FieldLabel For="@modelRequest.UserName">Nombre de Usuario</FieldLabel>
+                            <FieldBody>
+                                <TextEdit Placeholder="Nombre de Usuario" @bind-Text="@modelRequest.UserName">
+                                    <Feedback>
+                                        <ValidationError />
+                                    </Feedback>
+                                </TextEdit>
+                            </FieldBody>
+                        </Field>
+                    </Validation>
 
-            <Div TextAlignment="TextAlignment.Center" Class="form-group mb-3">
-                <Button Type="ButtonType.Submit" Class="btn btn-primary">Iniciar Sesión</Button>
-                <Button To="/" Class="btn btn-primary mx-auto">Volver a Inicio <i class="fa fa-home"></i></Button>
-            </Div>
-        </EditForm>
+                    <Validation>
+                        <Field Margin="Margin.Is3.FromBottom">
+                            <FieldLabel For="@modelRequest.Password">Contraseña</FieldLabel>
+                            <FieldBody>
+                                <TextEdit Role="TextRole.Password" Placeholder="Contraseña" @bind-Text="@modelRequest.Password">
+                                    <Feedback>
+                                        <ValidationError />
+                                    </Feedback>
+                                </TextEdit>
+                            </FieldBody>
+                        </Field>
+                    </Validation>
 
-        <hr />
+                    <Validation>
+                        <Field Margin="Margin.Is3.FromBottom">
+                            <FieldBody>
+                                <Check TValue="bool" @bind-Checked="@modelRequest.RememberMe">
+                                    <ChildContent>
+                                        Recuérdame
+                                    </ChildContent>
+                                    <Feedback>
+                                        <ValidationError />
+                                    </Feedback>
+                                </Check>
+                            </FieldBody>
+                        </Field>
+                    </Validation>
 
-        <Div TextAlignment="TextAlignment.Center">
-            <Button Type="ButtonType.Link" Class="small" To="/account/forgotpassword">¿Se te olvidó la contraseña?</Button>
-        </Div>
+                    <Row Margin="Margin.Is3.FromBottom" Flex="Flex.JustifyContent.Center">
+                        <Column ColumnSize="ColumnSize.Is6.OnTablet" Margin="Margin.Is3.FromBottom">
+                            <Button Clicked="@HandleSubmit" Color="Color.Primary" Width="Width.Is100">Iniciar Sesión</Button>
+                        </Column>
 
-        <Div TextAlignment="TextAlignment.Center">
-            <Button Type="ButtonType.Link" Class="small" To="/account/register">¿No cuentas con un usuario? ¡Regístrate!</Button>
-        </Div>
-    </Div>
-</Column>
+                        <Column ColumnSize="ColumnSize.Is6.OnTablet" Margin="Margin.Is3.FromBottom">
+                            <Button To="/" Type="ButtonType.Link" Color="Color.Primary" Width="Width.Is100">Volver a Inicio <Icon Name="@("fa-home")" /></Button>
+                        </Column>
+                    </Row>
+                </Validations>
+            </Column>
+        </Row>
+    </Column>
+</Row>
 
-@if (ShowErrors)
-{
-    <div class="alert alert-danger" role="alert">
-        @foreach (var error in Errors)
-        {
-            <p class="mb-0">@error</p>
-        }
-    </div>
-}
+<Divider />
+
+<Div Margin="Margin.Is3.FromBottom" TextAlignment="TextAlignment.Center">
+    <Link To="/account/forgotpassword">¿Se le olvidó la contraseña?</Link>
+</Div>
 
 @code {
-    private LoginRequest ModelRequest { get; set; } = new LoginRequest();
-    private bool ShowErrors;
-    private IEnumerable<string> Errors = null!;
+    private Validations validationsRef = new Validations();
+    private LoginRequest modelRequest = new LoginRequest();
+
+    private bool showErrors = false;
+    private IEnumerable<string> errors = null!;
+
+    private async Task HandleSubmit()
+    {
+        showErrors = false;
+
+        if (await validationsRef.ValidateAll())
+        {
+            await Submit();
+        }
+    }
 
     private async Task Submit()
     {
-        ShowErrors = false;
-
-        ApiResponse result = await authService.Login(ModelRequest);
+        ApiResponse result = await authService.Login(modelRequest);
 
         if (result.Successful)
         {
@@ -74,8 +117,8 @@
         }
         else
         {
-            Errors = result.ErrorMessages;
-            ShowErrors = true;
+            errors = result.ErrorMessages;
+            showErrors = true;
         }
     }
 }

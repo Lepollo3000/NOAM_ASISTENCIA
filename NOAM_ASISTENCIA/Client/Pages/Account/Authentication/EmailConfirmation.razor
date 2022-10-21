@@ -1,25 +1,34 @@
 ﻿@page "/account/register/emailconfirmation/{Username}/{UserEmail}/{ResendEmail}"
+@layout AuthLayout
 @inject NavigationManager navigationManager
 
 <PageTitle>Confirme su cuenta</PageTitle>
 
-<div class="col justify-content-center p-5">
-    <div class="text-center">
-        <h1 class="text-gray-900 mb-4">Confirme su cuenta</h1>
-    </div>
+<Row>
+    <Column>
+        <Div TextAlignment="TextAlignment.Center" Margin="Margin.Is3.FromBottom">
+            <Heading Size="HeadingSize.Is4" TextColor="TextColor.Black50" Margin="Margin.Is4.FromBottom">Confirme su cuenta</Heading>
+        </Div>
 
-    <hr />
+        <Divider />
 
-    <p>Su cuenta @Username ha sido registrada exitosamente, sin embargo aún falta un paso.</p>
-    <p>Revise el correo electrónico con el que registró esta cuenta (@UserEmail) y siga las indicaciones para confirmar su cuenta.</p>
-    <p>Puede cerrar esta ventana.</p>
+        <Row>
+            <Column Margin="Margin.Is3.FromBottom" TextAlignment="TextAlignment.Justified">
+                <Paragraph>Su cuenta '@Username' ha sido registrada exitosamente.</Paragraph>
+                <Paragraph>Un administrador debe aceptar este usuario para que pueda iniciar sesión, así que esté al pendiente.</Paragraph>
+                <Paragraph>Puede cerrar esta ventana.</Paragraph>
+            </Column>
+        </Row>
 
-    <div class="text-center">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
-            Volver a Inicio
-        </a>
-    </div>
-</div>
+        <Divider />
+
+        <Row Margin="Margin.Is3.FromBottom" Flex="Flex.JustifyContent.Center">
+            <Column ColumnSize="ColumnSize.Is6.OnTablet" Margin="Margin.Is3.FromBottom">
+                <Button To="/" Type="ButtonType.Link" Color="Color.Primary" Width="Width.Is100">Volver a Inicio <Icon Name="@("fa-home")" /></Button>
+            </Column>
+        </Row>
+    </Column>
+</Row>
 
 @code {
     [Parameter]
@@ -28,8 +37,6 @@
     public string UserEmail { get; set; } = null!;
     [Parameter]
     public string ResendEmail { get; set; } = null!;
-
-    private string Error { get; set; } = "";
 
     protected override async Task OnInitializedAsync()
     {
