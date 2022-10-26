@@ -26,31 +26,33 @@ namespace NOAM_ASISTENCIA.Server
         {
             string strAdministradorRole = "Administrador";
             string strGerenteRole = "Gerente";
-            string strCajeroRole = "Cajero";
+            string strIntendenteRole = "Intendente";
 
             string strAdministradorEmail = "usuario.administrador@gmail.com";
             string strAdministradorPassword = "Pa55w.rd";
+            string strAdministradorUserName = "administrador";
             string strAdministradorNombre = "Usuario";
             string strAdministradorApellido = "Administrador";
 
             string strGerenteEmail = "usuario.gerente@gmail.com";
             string strGerentePassword = "Pa55w.rd";
+            string strGerenteUserName = "gerente";
             string strGerenteNombre = "Usuario";
             string strGerenteApellido = "Gerente";
 
-            string strCajeroEmail = "usuario.cajero@gmail.com";
-            string strCajeroPassword = "Pa55w.rd";
-            string strCajeroNombre = "Usuario";
-            string strCajeroApellido = "Cajero";
+            string strIntendenteEmail = "usuario.intendente@gmail.com";
+            string strIntendentePassword = "Pa55w.rd";
+            string strIntendenteUserName = "Intendente";
+            string strIntendenteNombre = "Usuario";
+            string strIntendenteApellido = "Intendente";
 
             if (!(tryCreateRoleIfNotExist(roleManager, strAdministradorRole) &&
-                tryCreateRoleIfNotExist(roleManager, strGerenteRole) &&
-                tryCreateRoleIfNotExist(roleManager, strCajeroRole)))
+                tryCreateRoleIfNotExist(roleManager, strGerenteRole)))
                 return false;
 
-            if (!(tryCreateUserIfNotExistsAndAddRole(userManager, strAdministradorEmail, strAdministradorPassword, strAdministradorRole, strAdministradorNombre, strAdministradorApellido) &&
-                tryCreateUserIfNotExistsAndAddRole(userManager, strGerenteEmail, strGerentePassword, strGerenteRole, strGerenteNombre, strGerenteApellido) &&
-                tryCreateUserIfNotExistsAndAddRole(userManager, strCajeroEmail, strCajeroPassword, strCajeroRole, strCajeroNombre, strCajeroApellido)))
+            if (!(tryCreateUserIfNotExistsAndAddRole(userManager, strAdministradorEmail, strAdministradorPassword, strAdministradorRole, strAdministradorUserName, strAdministradorNombre, strAdministradorApellido) &&
+                tryCreateUserIfNotExistsAndAddRole(userManager, strGerenteEmail, strGerentePassword, strGerenteRole, strGerenteUserName, strGerenteNombre, strGerenteApellido) &&
+                tryCreateUserIfNotExistsAndAddRole(userManager, strIntendenteEmail, strIntendentePassword, strIntendenteRole, strIntendenteUserName, strIntendenteNombre, strIntendenteApellido)))
                 return false;
 
             return true;
@@ -81,7 +83,7 @@ namespace NOAM_ASISTENCIA.Server
             return true;
         }
 
-        private static bool tryCreateUserIfNotExistsAndAddRole(UserManager<ApplicationUser> userManager, string strEmail, string strPassword, string strRole, string strNombre, string strApellido)
+        private static bool tryCreateUserIfNotExistsAndAddRole(UserManager<ApplicationUser> userManager, string strEmail, string strPassword, string strRole, string strUserName, string strNombre, string strApellido)
         {
             try
             {
@@ -105,7 +107,7 @@ namespace NOAM_ASISTENCIA.Server
                     userManager.CreateAsync(oUser, strPassword).Wait();
                 }
 
-                if (oUser != null)
+                if (oUser != null && strRole != null)
                     userManager.AddToRoleAsync(oUser, strRole).Wait();
             }
             catch (Exception)
