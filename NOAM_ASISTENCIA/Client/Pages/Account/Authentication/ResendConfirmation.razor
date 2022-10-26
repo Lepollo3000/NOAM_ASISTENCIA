@@ -62,8 +62,8 @@
         CheckIfParametersAreNull();
 
         ResendEmailRequest model = new ResendEmailRequest() { UserId = UserId };
-        ApiResponse result = await authService.ResendConfirmationEmail(model);
-        ConfirmEmailResult modelResult = (result.Result as ConfirmEmailResult)!;
+        ApiResponse<ResendEmailResult> result = await authService.ResendConfirmationEmail(model);
+        ResendEmailResult modelResult = result.Result!;
 
         if (modelResult != null)
         {

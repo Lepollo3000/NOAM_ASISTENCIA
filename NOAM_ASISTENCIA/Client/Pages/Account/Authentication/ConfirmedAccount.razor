@@ -75,7 +75,7 @@
         CheckIfParametersAreNull();
 
         ConfirmEmailRequest model = new ConfirmEmailRequest() { Token = Token, UserId = UserId };
-        ApiResponse result = await authService.ConfirmEmail(model);
+        ApiResponse<ConfirmEmailResult> result = await authService.ConfirmEmail(model);
         ConfirmEmailResult modelResult = (result.Result as ConfirmEmailResult)!;
 
         if (modelResult != null)

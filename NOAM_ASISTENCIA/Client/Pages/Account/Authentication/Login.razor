@@ -109,7 +109,7 @@
 
     private async Task Submit()
     {
-        ApiResponse result = await authService.Login(modelRequest);
+        ApiResponse<LoginResult> result = await authService.Login(modelRequest);
 
         if (result.Successful)
         {

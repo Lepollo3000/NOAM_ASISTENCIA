@@ -48,7 +48,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                 if (!result.Succeeded)
                 {
                     var errors = result.Errors.Select(x => x.Description);
-                    var badRequestResponseModel = new ApiResponse()
+                    var badRequestResponseModel = new ApiResponse<RegisterResult>()
                     {
                         Successful = false,
                         Result = new RegisterResult(),
@@ -66,7 +66,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     return StatusCode(500, modelResultFail);
                 }*/
 
-                var okResponseModel = new ApiResponse()
+                var okResponseModel = new ApiResponse<RegisterResult>()
                 {
                     Successful = true,
                     Result = new RegisterResult()
@@ -77,10 +77,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
             catch (Exception e)
             {
                 var errors = new List<string>() { "Error interno del servidor, inténtelo de nuevo más tarde." };
-                var internalServerErrorResponseModel = new ApiResponse()
+                var internalServerErrorResponseModel = new ApiResponse<RegisterResult>()
                 {
                     Successful = false,
-                    Result = new RegisterResult(),
+                    Result = null,
                     ErrorMessages = errors
                 };
 
@@ -96,10 +96,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
             if (user == null)
             {
                 var errors = new List<string>() { "Usuario no encontrado o inexistente." };
-                var badRequestResponseModel = new ApiResponse()
+                var badRequestResponseModel = new ApiResponse<ResendEmailResult>()
                 {
                     Successful = false,
-                    Result = new ResendEmailResult(),
+                    Result = null,
                     ErrorMessages = errors
                 };
 
@@ -115,7 +115,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                 return StatusCode(500, modelResultFail);
             }*/
 
-            var okResponseModel = new ApiResponse()
+            var okResponseModel = new ApiResponse<ResendEmailResult>()
             {
                 Successful = true,
                 Result = new ResendEmailResult()
@@ -138,10 +138,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                 if (user == null)
                 {
                     var errors = new List<string>() { "Usuario no encontrado o inexistente." };
-                    var badRequestResponseModel = new ApiResponse()
+                    var badRequestResponseModel = new ApiResponse<ConfirmEmailResult>()
                     {
                         Successful = false,
-                        Result = new ConfirmEmailResult(),
+                        Result = null,
                         ErrorMessages = errors
                     };
 
@@ -159,7 +159,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     // VERIFICA SI ALGUNO DE LOS ERRORES ES POR TOKEN INVALIDO
                     var errors = result.Errors.Select(x => x.Description);
                     var isTokenError = result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.InvalidToken));
-                    var badRequestResponseModel = new ApiResponse()
+                    var badRequestResponseModel = new ApiResponse<ConfirmEmailResult>()
                     {
                         Successful = false,
                         Result = new ConfirmEmailResult()
@@ -172,13 +172,13 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
 
                     if (isTokenError)
                     {
-                        ((ConfirmEmailResult)badRequestResponseModel.Result).IsTokenError = true;
+                        badRequestResponseModel.Result.IsTokenError = true;
                     }
 
                     return BadRequest(badRequestResponseModel);
                 }
 
-                var okResponseModel = new ApiResponse()
+                var okResponseModel = new ApiResponse<ConfirmEmailResult>()
                 {
                     Successful = true,
                     Result = new ConfirmEmailResult()
@@ -193,10 +193,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
             catch (Exception e)
             {
                 var errors = new List<string>() { "Error interno del servidor, inténtelo de nuevo más tarde." };
-                var internalServerErrorResponseModel = new ApiResponse()
+                var internalServerErrorResponseModel = new ApiResponse<ConfirmEmailResult>()
                 {
                     Successful = false,
-                    Result = new ConfirmEmailResult(),
+                    Result = null,
                     ErrorMessages = errors
                 };
 
@@ -219,10 +219,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     {
                         var errors = new List<string>() { "No se pudo iniciar la sesión. Contacte a un administrador." };
 
-                        var forbiddenResponseModel = new ApiResponse()
+                        var forbiddenResponseModel = new ApiResponse<LoginResult>()
                         {
                             Successful = false,
-                            Result = new LoginResult(),
+                            Result = null,
                             ErrorMessages = errors
                         };
 
@@ -244,10 +244,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                         else
                             errors.Add("Credenciales inválidas. Verifique que se hayan ingresado correctamente.");
 
-                        var badRequestResponseModel = new ApiResponse()
+                        var badRequestResponseModel = new ApiResponse<LoginResult>()
                         {
                             Successful = false,
-                            Result = new LoginResult(),
+                            Result = null,
                             ErrorMessages = errors
                         };
 
@@ -258,10 +258,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                 {
                     var errors = new List<string>() { "Credenciales inválidas. Verifique que se hayan ingresado correctamente." };
 
-                    var badRequestResponseModel = new ApiResponse()
+                    var badRequestResponseModel = new ApiResponse<LoginResult>()
                     {
                         Successful = false,
-                        Result = new LoginResult(),
+                        Result = null,
                         ErrorMessages = errors
                     };
 
@@ -294,7 +294,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     signingCredentials: credencials
                 );
 
-                var okResponseModel = new ApiResponse()
+                var okResponseModel = new ApiResponse<LoginResult>()
                 {
                     Successful = true,
                     Result = new LoginResult()
@@ -308,10 +308,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
             catch (Exception e)
             {
                 var errors = new List<string>() { "Error interno del servidor, inténtelo de nuevo más tarde." };
-                var internalServerErrorResponseModel = new ApiResponse()
+                var internalServerErrorResponseModel = new ApiResponse<LoginResult>()
                 {
                     Successful = false,
-                    Result = new LoginResult(),
+                    Result = null,
                     ErrorMessages = errors
                 };
 

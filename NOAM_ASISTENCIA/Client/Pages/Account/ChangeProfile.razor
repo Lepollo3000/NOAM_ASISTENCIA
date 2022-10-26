@@ -77,7 +77,7 @@
     {
         ShowErrors = false;
 
-        ApiResponse result = await authService.Register(ModelRequest);
+        ApiResponse<RegisterResult> result = await authService.Register(ModelRequest);
 
         if (result.Successful)
         {

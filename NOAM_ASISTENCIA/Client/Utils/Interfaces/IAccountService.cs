@@ -5,10 +5,10 @@ namespace NOAM_ASISTENCIA.Client.Utils.Interfaces
 {
     public interface IAccountService
     {
-        Task<ApiResponse> Login(LoginRequest model);
+        Task<ApiResponse<LoginResult>> Login(LoginRequest model);
         Task Logout();
-        Task<ApiResponse> Register(RegisterRequest model);
-        Task<ApiResponse> ConfirmEmail(ConfirmEmailRequest model);
-        Task<ApiResponse> ResendConfirmationEmail(ResendEmailRequest model);
+        Task<ApiResponse<RegisterResult>> Register(RegisterRequest model);
+        Task<ApiResponse<ConfirmEmailResult>> ConfirmEmail(ConfirmEmailRequest model);
+        Task<ApiResponse<ResendEmailResult>> ResendConfirmationEmail(ResendEmailRequest model);
     }
 }

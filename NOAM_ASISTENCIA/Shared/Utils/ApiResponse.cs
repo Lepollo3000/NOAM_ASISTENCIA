@@ -4,10 +4,10 @@ using System.Linq;
 
 namespace NOAM_ASISTENCIA.Shared.Utils
 {
-    public class ApiResponse
+    public class ApiResponse<TObject>
     {
         public bool Successful { get; set; } = false;
-        public object Result { get; set; } = null!;
+        public TObject? Result { get; set; } = default!;
         public IEnumerable<string> ErrorMessages { get; set; } = null!;
     }
 }
