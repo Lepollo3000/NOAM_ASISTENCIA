@@ -2,7 +2,7 @@
 
 namespace NOAM_ASISTENCIA.Shared.Models
 {
-    public class Turno
+    public class TurnoViewModel
     {
         private const string requiredErrorMessage = "El campo '{0}' es requerido.";
 

@@ -1,11 +1,9 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using NOAM_ASISTENCIA.Client.Utils.Interfaces;
 using NOAM_ASISTENCIA.Shared.Utils.AuthModels;
 using NOAM_ASISTENCIA.Shared.Utils;
-using System.Text.Json;
 
 namespace NOAM_ASISTENCIA.Client.Utils
 {

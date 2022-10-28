@@ -8,7 +8,7 @@ namespace NOAM_ASISTENCIA.Server.Models
     {
         public ApplicationUser()
         {
-            Asistencias = new HashSet<Asistencium>();
+            Asistencias = new HashSet<Asistencia>();
         }
 
         [Required]
@@ -26,6 +26,6 @@ namespace NOAM_ASISTENCIA.Server.Models
         [InverseProperty("ApplicationUsers")]
         public virtual Turno IdTurnoNavigation { get; set; } = null!;
         [InverseProperty("IdUsuarioNavigation")]
-        public virtual ICollection<Asistencium> Asistencias { get; set; }
+        public virtual ICollection<Asistencia> Asistencias { get; set; }
     }
 }

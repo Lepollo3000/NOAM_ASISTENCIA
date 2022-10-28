@@ -51,7 +51,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     var badRequestResponseModel = new ApiResponse<RegisterResult>()
                     {
                         Successful = false,
-                        Result = new RegisterResult(),
+                        Result = null,
                         ErrorMessages = errors
                     };
 

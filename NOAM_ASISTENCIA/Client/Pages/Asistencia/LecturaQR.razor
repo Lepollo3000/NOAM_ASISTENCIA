@@ -1,20 +1,17 @@
-﻿@page "/asistencia/registro/{IdSucursal:int}"
+﻿@page "/asistencia/qr"
 @inject IAsistenciaService AsistenciaService
 @inject CustomAuthenticationStateProvider AuthStateProvider
-@attribute [Authorize]
 
-<PageTitle>Registro de Asistencia</PageTitle>
+<PageTitle>Registro de asistencia</PageTitle>
 
-<h3>Asistencia</h3>
+<h3>LecturaQR</h3>
+
+<LectorQR />
 
 @code {
-    [Parameter]
-    public int IdSucursal { get; set; }
+    private int IdSucursal;
 
-    private RegistroAsistenciaRequest Asistencia = null!;
-
-    protected override async Task OnInitializedAsync()
-    {
+    private async Task VerificarSucursal(){
         var result = await AsistenciaService.VerificarSucursal(new VerificacionSucursalRequest { IdSucursal = IdSucursal });
 
         if (result.Successful)

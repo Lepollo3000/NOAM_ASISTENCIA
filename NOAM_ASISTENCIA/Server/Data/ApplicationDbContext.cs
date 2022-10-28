@@ -12,7 +12,7 @@ namespace NOAM_ASISTENCIA.Server.Data
         {
         }
 
-        public virtual DbSet<Asistencium> Asistencia { get; set; } = null!;
+        public virtual DbSet<Asistencia> Asistencia { get; set; } = null!;
         public virtual DbSet<SucursalServicio> SucursalServicios { get; set; } = null!;
         public virtual DbSet<Turno> Turnos { get; set; } = null!;
 
@@ -20,7 +20,7 @@ namespace NOAM_ASISTENCIA.Server.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Asistencium>(entity =>
+            modelBuilder.Entity<Asistencia>(entity =>
             {
                 entity.HasKey(e => new { e.IdUsuario, e.IdSucursal, e.FechaEntrada });
 

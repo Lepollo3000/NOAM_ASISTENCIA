@@ -11,7 +11,7 @@ namespace NOAM_ASISTENCIA.Server.Models
     {
         public SucursalServicio()
         {
-            Asistencia = new HashSet<Asistencium>();
+            Asistencia = new HashSet<Asistencia>();
         }
 
         [Key]
@@ -20,6 +20,6 @@ namespace NOAM_ASISTENCIA.Server.Models
         public string Descripcion { get; set; } = null!;
 
         [InverseProperty("IdSucursalNavigation")]
-        public virtual ICollection<Asistencium> Asistencia { get; set; }
+        public virtual ICollection<Asistencia> Asistencia { get; set; }
     }
 }

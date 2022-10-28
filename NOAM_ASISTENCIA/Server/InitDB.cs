@@ -42,14 +42,17 @@ namespace NOAM_ASISTENCIA.Server
 
             string strIntendenteEmail = "usuario.intendente@gmail.com";
             string strIntendentePassword = "Pa55w.rd";
-            string strIntendenteUserName = "Intendente";
+            string strIntendenteUserName = "intendente";
             string strIntendenteNombre = "Usuario";
             string strIntendenteApellido = "Intendente";
 
+            // CREA LOS ROLES DE USUARIO
             if (!(tryCreateRoleIfNotExist(roleManager, strAdministradorRole) &&
-                tryCreateRoleIfNotExist(roleManager, strGerenteRole)))
+                tryCreateRoleIfNotExist(roleManager, strGerenteRole) &&
+                tryCreateRoleIfNotExist(roleManager, strIntendenteRole)))
                 return false;
 
+            // CREA USUARIOS PREDETERMINADOS PARA CADA ROL
             if (!(tryCreateUserIfNotExistsAndAddRole(userManager, strAdministradorEmail, strAdministradorPassword, strAdministradorRole, strAdministradorUserName, strAdministradorNombre, strAdministradorApellido) &&
                 tryCreateUserIfNotExistsAndAddRole(userManager, strGerenteEmail, strGerentePassword, strGerenteRole, strGerenteUserName, strGerenteNombre, strGerenteApellido) &&
                 tryCreateUserIfNotExistsAndAddRole(userManager, strIntendenteEmail, strIntendentePassword, strIntendenteRole, strIntendenteUserName, strIntendenteNombre, strIntendenteApellido)))
@@ -95,7 +98,7 @@ namespace NOAM_ASISTENCIA.Server
                     oUser = new ApplicationUser()
                     {
                         Id = Guid.NewGuid(),
-                        UserName = strEmail,
+                        UserName = strUserName,
                         Email = strEmail,
                         EmailConfirmed = true,
                         IdTurno = 1,

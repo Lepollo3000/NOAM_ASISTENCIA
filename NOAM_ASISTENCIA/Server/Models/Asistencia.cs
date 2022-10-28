@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace NOAM_ASISTENCIA.Server.Models
 {
-    public partial class Asistencium
+    public partial class Asistencia
     {
         [Key]
         public Guid IdUsuario { get; set; }

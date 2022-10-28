@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BlazorBarcodeScanner.ZXing.JS" Version="0.2.8" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
     <PackageReference Include="Blazorise" Version="1.1.2" />
     <PackageReference Include="Blazorise.Bootstrap" Version="1.1.2" />
@@ -21,9 +22,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.10" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.10" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="Syncfusion.Blazor.Data" Version="20.3.0.50" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="20.3.0.50" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="20.3.0.50" />
+    <PackageReference Include="Syncfusion.Blazor.Data" Version="20.3.0.52" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="20.3.0.52" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="20.3.0.52" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
   </ItemGroup>
 
@@ -37,7 +38,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\css\bootstrap\dist\" />
-    <Folder Include="wwwroot\lib\" />
   </ItemGroup>
 
 </Project>

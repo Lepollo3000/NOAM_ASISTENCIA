@@ -23,18 +23,8 @@
                             </BarLink>
                         </BarItem>
 
-                        <AuthorizeView Roles="Administrador">
-                            <BarItem>
-                                <BarDropdown>
-                                    <BarDropdownToggle>
-                                        Administración
-                                        <BarIcon IconName="@("fa-users")" Style="float: right; margin-right: 20px;" />
-                                    </BarDropdownToggle>
-                                    <BarDropdownMenu>
-                                        <NavMenuAdministrador />
-                                    </BarDropdownMenu>
-                                </BarDropdown>
-                            </BarItem>
+                        <AuthorizeView Roles="Intendente">
+                            <NavMenuIntendente />
                         </AuthorizeView>
                     </BarStart>
                 </BarMenu>
