@@ -1,28 +1,39 @@
 ﻿@using BlazorBarcodeScanner.ZXing.JS
 @inject IJSRuntime JS
 
-<Div Flex="Flex.JustifyContent.Center">
-    <BarcodeReader Title="Scan Barcode from Camera"
+<Row>
+    <Alert>
+        
+    </Alert>
+</Row>
+<Row Flex="Flex.JustifyContent.Center">
+    <BarcodeReader @ref=_readerRef Title="Scan Barcode from Camera"
                    StartCameraAutomatically="false"
-                   OnCodeReceived="LocalReceivedBarcodeText"
-                   ShowStart="true"
-                   ShowReset="true"
-                   ShowToggleTorch="true"
+                   OnBarcodeReceived="LocalReceivedBarcodeText"
+                   ShowStart="false"
+                   ShowReset="false"
+                   ShowResult="false"
+                   ShowToggleTorch="false"
                    VideoWidth="300"
-                   VideoHeight="200" />
-</Div>
-
-@if (LocalBarcodeText != null)
-{
-    <h4>@LocalBarcodeText</h4>
-}
+                   VideoHeight="300" />
+</Row>
+<Row Flex="Flex.JustifyContent.Center">
+    <Button Clicked="InitCamera" Color="Color.Primary">Iniciar Cámara <Icon Name="IconName.Camera" /></Button>
+</Row>
 
 @code {
+    private BarcodeReader? _readerRef;
+
     private string LocalBarcodeText = null!;
+
+    private void InitCamera()
+    {
+        _readerRef!.StartDecoding();
+    }
 
     private void LocalReceivedBarcodeText(BarcodeReceivedEventArgs args)
     {
-        this.LocalBarcodeText = args.BarcodeText;
+        LocalBarcodeText = args.BarcodeText;
         StateHasChanged();
     }
 }
