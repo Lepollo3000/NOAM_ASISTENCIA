@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Utils\**" />
+    <Content Remove="Utils\**" />
+    <EmbeddedResource Remove="Utils\**" />
+    <None Remove="Utils\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BlazorZXingJs" Version="0.5.13" />
     <PackageReference Include="MailKit" Version="3.4.2" />
     <PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.3" />
@@ -34,7 +41,6 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="Utils\" />
   </ItemGroup>
 
 </Project>
