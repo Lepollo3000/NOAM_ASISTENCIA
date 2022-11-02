@@ -1,0 +1,55 @@
+﻿@page "/asistencia/registrar"
+@inject IAsistenciaService AsistenciaService
+@inject CustomAuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Registro de asistencia</PageTitle>
+
+<Row Flex="Flex.JustifyContent.Center">
+    <Column ColumnSize="ColumnSize.Is8.OnTablet.Is10.OnMobile">
+        <Heading TextAlignment="TextAlignment.Center" Size="HeadingSize.Is1">Registro de asistencia</Heading>
+
+        <Row Flex="Flex.JustifyContent.Center">
+            <Alert Color="Color.Info" Padding="Padding.Is3" Visible="true">
+                <AlertMessage>
+                    <Paragraph>A tomar en cuenta:</Paragraph>
+                </AlertMessage>
+
+                <AlertDescription>
+                    <UnorderedList>
+                        <UnorderedListItem>En esta pantalla se registrará la asistencia del usuario que tenga la sesión iniciada en este dispositivo.</UnorderedListItem>
+                        <UnorderedListItem>Debe leer el código QR que se encuentra en el establecimiento donde se vaya a dar el servicio de limpieza.</UnorderedListItem>
+                        <UnorderedListItem>Para conseguir hacer la lectura, se debe hacer clic en el botón "Iniciar Cámara" y conceder los permisos necesarios a la aplicación.</UnorderedListItem>
+                    </UnorderedList>
+                </AlertDescription>
+            </Alert>
+        </Row>
+
+        <LectorQR OnCodeReceived="VerificarSucursal" />
+    </Column>
+</Row>
+
+<Modal>
+
+</Modal>
+
+@code {
+    private Modal? _modalRef = null!;
+
+    private bool ShowErrors;
+    private IEnumerable<string> Errors = null!;
+
+    private Task ShowError() => _modalRef!.Show();
+    private Task HideModal() => _modalRef!.Hide();
+
+    private async void VerificarSucursal(int args)
+    {
+        var result = await AsistenciaService.VerificarSucursal(new VerificacionSucursalRequest { IdSucursal = args });
+
+        if (result.Successful)
+        {
+            var authstate = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authstate.User;
+            var name = user.Identity!.Name;
+        }
+    }
+}
