@@ -1,0 +1,31 @@
+﻿<Row Flex="Flex.JustifyContent.Center">
+    <Column Padding="Padding.Is5.OnX">
+        <Row Flex="Flex.JustifyContent.Center">
+            <Icon Name="IconName.Check" TextColor="TextColor.Success" IconSize="IconSize.x4" />
+        </Row>
+
+        <Row Margin="Margin.Is3.FromTop">
+            <Paragraph TextAlignment="TextAlignment.Justified">
+                El usuario con nombre "@Result.Username" ha registrado de forma exitosa su @(Result.EsEntrada ? "entrada" : "salida").
+            </Paragraph>
+
+            <Paragraph TextAlignment="TextAlignment.End">
+                Fecha: @Result.Fecha.ToString("yyyy/MM/dd")
+            </Paragraph>
+
+            <Paragraph TextAlignment="TextAlignment.End">
+                Hora: @Result.Fecha.ToString("HH:mm")
+            </Paragraph>
+        </Row>
+    </Column>
+</Row>
+
+<Divider />
+
+<Row Flex="Flex.JustifyContent.Center">
+    <Button Color="Color.Primary" To="">Jalo</Button>
+</Row>
+
+@code {
+    [Parameter] public RegistroAsistenciaResult Result { get; set; } = null!;
+}

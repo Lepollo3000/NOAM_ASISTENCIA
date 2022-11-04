@@ -25,31 +25,91 @@
         </Row>
 
         <LectorQR OnCodeReceived="VerificarSucursal" />
+
+        <Row Visibility="SpinkitVisibility" Flex="Flex.JustifyContent.Center">
+            <BlazorPro.Spinkit.Flow />
+        </Row>
     </Column>
 </Row>
 
-<Modal>
-
-</Modal>
-
 @code {
-    private Modal? _modalRef = null!;
+    [Inject] public IModalService ModalService { get; set; } = null!;
 
     private bool ShowErrors;
     private IEnumerable<string> Errors = null!;
 
-    private Task ShowError() => _modalRef!.Show();
-    private Task HideModal() => _modalRef!.Hide();
+    private Visibility SpinkitVisibility = Visibility.Invisible;
+
+    private Task ShowError(RenderFragment errorRenderFragment) => ModalService.Show("", errorRenderFragment);
+    private Task ShowSuccess(RenderFragment successRenderFragment) => ModalService.Show("", successRenderFragment);
+
+    private void ShowSpinKit() => SpinkitVisibility = Visibility.Visible;
+    private void HideSpinKit() => SpinkitVisibility = Visibility.Invisible;
 
     private async void VerificarSucursal(int args)
     {
-        var result = await AsistenciaService.VerificarSucursal(new VerificacionSucursalRequest { IdSucursal = args });
+        // MOSTRAR QUE SE ESTA HACIENDO LA ACCION PERO VA A TARDAR
+        ShowSpinKit();
 
-        if (result.Successful)
+        // INICIALIZAR RENDER FRAGMENT PARA MOSTRAR LOS MENSAJES DE EXITO O ERROR
+        RenderFragment renderFragment = null!;
+
+        // VERIFICAR LA EXISTENCIA DE SUCURSAL
+        ApiResponse<SucursalServicioViewModel> sucursalResult = await AsistenciaService
+            .VerificarSucursal(new VerificacionSucursalRequest { IdSucursal = args });
+
+        if (sucursalResult.Successful)
         {
-            var authstate = await AuthStateProvider.GetAuthenticationStateAsync();
-            var user = authstate.User;
-            var name = user.Identity!.Name;
+            // OBTENER LOS CLAIMS DE SESION PARA OBTENER EL NOMBRE DE USUARIO
+            AuthenticationState authstate = await AuthStateProvider.GetAuthenticationStateAsync();
+            ClaimsPrincipal user = authstate.User;
+            string name = user.Identity!.Name!;
+
+            // REGISTRAR LA ASISTENCIA CON LOS DATOS ANTERIORES
+            ApiResponse<RegistroAsistenciaResult> registroResult = await AsistenciaService
+                .RegistrarAsistencia(new RegistroAsistenciaRequest { Username = name, IdSucursal = sucursalResult.Result!.Id });
+
+            if (registroResult.Successful)
+            {
+                if (registroResult.Result!.EsEntrada)
+                {
+                    HideSpinKit();
+
+                    // MOSTRAR EXITO
+                    renderFragment = __builder =>
+                    {
+                        <NOAM_ASISTENCIA.Client.Shared.Alerts.AsistenciaSuccessRenderFragment Result="@registroResult.Result" />
+                    };
+
+                    await ShowSuccess(renderFragment);
+                }
+            }
+            else
+            {
+                HideSpinKit();
+
+                // MOSTRAR ERROR
+                renderFragment = __builder =>
+                {
+                    <NOAM_ASISTENCIA.Client.Shared.Alerts.ErrorAlertRenderFragment Errors="@registroResult.ErrorMessages" />
+                };
+
+                await ShowError(renderFragment);
+            }
         }
+        else
+        {
+            HideSpinKit();
+
+            // MOSTRAR ERROR
+            renderFragment = __builder =>
+            {
+                <NOAM_ASISTENCIA.Client.Shared.Alerts.ErrorAlertRenderFragment Errors="@sucursalResult.ErrorMessages" />
+            };
+
+            await ShowError(renderFragment);
+        }
+
+        HideSpinKit();
     }
 }

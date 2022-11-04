@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blazorise;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;
+using NOAM_ASISTENCIA.Shared.Models;
+using NOAM_ASISTENCIA.Shared.Utils;
+using NOAM_ASISTENCIA.Shared.Utils.AsistenciaModels;
 
 namespace NOAM_ASISTENCIA.Server.Controllers
 {
@@ -15,10 +20,12 @@ namespace NOAM_ASISTENCIA.Server.Controllers
     public class AsistenciasController : ControllerBase
     {
         private readonly ApplicationDbContext _dbcontext;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AsistenciasController(ApplicationDbContext context)
+        public AsistenciasController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _dbcontext = context;
+            _userManager = userManager;
         }
 
         // GET: api/Asistencias
@@ -60,14 +67,14 @@ namespace NOAM_ASISTENCIA.Server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AsistenciumExists(id))
+                /*if (!AsistenciumExists(id))
                 {
                     return NotFound();
                 }
                 else
                 {
                     throw;
-                }
+                }*/
             }
 
             return NoContent();
@@ -76,27 +83,73 @@ namespace NOAM_ASISTENCIA.Server.Controllers
         // POST: api/Asistencias
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Asistencia>> PostAsistencium(Asistencia asistencium)
+        public async Task<IActionResult> PostAsistencium(RegistroAsistenciaRequest model)
         {
-            _dbcontext.Asistencia.Add(asistencium);
+            var response = new ApiResponse<RegistroAsistenciaResult>();
 
-            try
-            {
-                await _dbcontext.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (AsistenciumExists(asistencium.IdUsuario))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var user = await _userManager.FindByNameAsync(model.Username);
+            var sucursal = await _dbcontext.SucursalServicios.FindAsync(model.IdSucursal);
 
-            return CreatedAtAction("GetAsistencium", new { id = asistencium.IdUsuario }, asistencium);
+            if (user != null && sucursal != null)
+            {
+                var asistencia = new Asistencia()
+                {
+                    IdUsuario = user.Id,
+                    IdSucursal = sucursal.Id,
+                    FechaEntrada = DateTime.UtcNow
+                };
+
+                _dbcontext.Asistencia.Add(asistencia);
+
+                try
+                {
+                    await _dbcontext.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (AsistenciaExists(asistencia.IdUsuario, asistencia.IdSucursal, asistencia.FechaEntrada))
+                    {
+                        var errors = new List<string>() { "Lo sentimos. Error interno del servidor, inténtelo de nuevo más tarde." };
+
+                        response.Successful = false;
+                        response.Result = null;
+                        response.ErrorMessages = errors;
+
+                        return Conflict(response);
+                    }
+                    else
+                    {
+                        var errors = new List<string>() { "Lo sentimos. Error interno del servidor, inténtelo de nuevo más tarde." };
+
+                        response.Successful = false;
+                        response.Result = null;
+                        response.ErrorMessages = errors;
+
+                        return StatusCode(500, response);
+                    }
+                }
+
+                response.Successful = true;
+                response.Result = new RegistroAsistenciaResult()
+                {
+                    Sucursal = sucursal.Descripcion,
+                    Username = user.UserName,
+                    Fecha = asistencia.FechaEntrada,
+                    EsEntrada = true
+                };
+
+                return CreatedAtAction("GetAsistencia", new { id = asistencia.IdUsuario }, response);
+            }
+            else
+            {
+                var errors = new List<string>() { "Información inválida. Verifique que la sucursal exista o tenga la sesión iniciada." };
+
+                response.Successful = false;
+                response.Result = null;
+                response.ErrorMessages = errors;
+
+                return BadRequest(response);
+            }
         }
 
         // DELETE: api/Asistencias/5
@@ -115,9 +168,13 @@ namespace NOAM_ASISTENCIA.Server.Controllers
             return NoContent();
         }
 
-        private bool AsistenciumExists(Guid id)
+        private bool AsistenciaExists(Guid idUsuario, int idSucursal, DateTime fechaEntrada)
         {
-            return _dbcontext.Asistencia.Any(e => e.IdUsuario == id);
+            return _dbcontext.Asistencia.Any(e =>
+                e.IdUsuario == idUsuario &&
+                e.IdSucursal == idSucursal &&
+                e.FechaEntrada == fechaEntrada
+            );
         }
     }
 }
