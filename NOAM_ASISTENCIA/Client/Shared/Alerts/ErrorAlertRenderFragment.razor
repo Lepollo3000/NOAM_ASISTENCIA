@@ -1,16 +1,16 @@
 ﻿<Row Flex="Flex.JustifyContent.Center">
-    <Column Padding="Padding.Is5.OnX">
+    <Column>
         <Row Flex="Flex.JustifyContent.Center">
             <Icon Name="IconName.Times" TextColor="TextColor.Danger" IconSize="IconSize.x4" />
         </Row>
 
-        <Row Flex="Flex.JustifyContent.Center" Margin="Margin.Is3.FromTop">
-            <UnorderedList TextColor="TextColor.Danger">
-                @foreach (var item in Errors)
-                {
-                    <UnorderedListItem>@item</UnorderedListItem>
-                }
-            </UnorderedList>
+        <Divider TextColor="TextColor.Light" />
+
+        <Row TextColor="TextColor.Danger" Margin="Margin.Is3.FromTop" Display="Display.Block" Padding="Padding.Is5.OnX">
+            @foreach (var item in Errors)
+            {
+                <Paragraph>@item</Paragraph>
+            }
         </Row>
     </Column>
 </Row>

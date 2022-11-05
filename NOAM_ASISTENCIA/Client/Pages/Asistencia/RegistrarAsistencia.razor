@@ -1,4 +1,5 @@
 ﻿@page "/asistencia/registrar"
+@attribute [Authorize]
 @inject IAsistenciaService AsistenciaService
 @inject CustomAuthenticationStateProvider AuthStateProvider
 
@@ -14,7 +15,7 @@
                     <Paragraph>A tomar en cuenta:</Paragraph>
                 </AlertMessage>
 
-                <AlertDescription>
+                <AlertDescription TextAlignment="TextAlignment.Justified">
                     <UnorderedList>
                         <UnorderedListItem>En esta pantalla se registrará la asistencia del usuario que tenga la sesión iniciada en este dispositivo.</UnorderedListItem>
                         <UnorderedListItem>Debe leer el código QR que se encuentra en el establecimiento donde se vaya a dar el servicio de limpieza.</UnorderedListItem>
@@ -24,11 +25,11 @@
             </Alert>
         </Row>
 
-        <LectorQR OnCodeReceived="VerificarSucursal" />
+        <LectorQR OnCodeReceived="GetApiInfo" />
 
-        <Row Visibility="SpinkitVisibility" Flex="Flex.JustifyContent.Center">
-            <BlazorPro.Spinkit.Flow />
-        </Row>
+        <Div Display="@_spinkitVisibility" Margin="Margin.Is3.FromTop">
+            <SpinKit Type="SpinKitType.Flow" Size="50px" Centered />
+        </Div>
     </Column>
 </Row>
 
@@ -38,78 +39,110 @@
     private bool ShowErrors;
     private IEnumerable<string> Errors = null!;
 
-    private Visibility SpinkitVisibility = Visibility.Invisible;
+    private IFluentDisplay _spinkitVisibility = Display.None;
 
-    private Task ShowError(RenderFragment errorRenderFragment) => ModalService.Show("", errorRenderFragment);
-    private Task ShowSuccess(RenderFragment successRenderFragment) => ModalService.Show("", successRenderFragment);
+    private void ShowSpinKit()
+    {
+        _spinkitVisibility = Display.Always;
+    }
+    private void HideSpinKit()
+    {
+        _spinkitVisibility = Display.None;
+    }
 
-    private void ShowSpinKit() => SpinkitVisibility = Visibility.Visible;
-    private void HideSpinKit() => SpinkitVisibility = Visibility.Invisible;
+    private Task ShowError(RenderFragment errorRenderFragment) => ModalService.Show("", errorRenderFragment, new ModalInstanceOptions() { Animated = true, Centered = true });
+    private Task ShowSuccess(RenderFragment successRenderFragment) => ModalService.Show("", successRenderFragment, new ModalInstanceOptions() { Animated = true, Centered = true });
+    private Task HideModal() => ModalService.Hide();
 
-    private async void VerificarSucursal(int args)
+    private async Task GetApiInfo(int args)
     {
         // MOSTRAR QUE SE ESTA HACIENDO LA ACCION PERO VA A TARDAR
         ShowSpinKit();
+        
+        await VerificarSucursal(args);
 
+        HideSpinKit();
+    }
+    
+    private async Task VerificarSucursal(int idSucursal)
+    {
         // INICIALIZAR RENDER FRAGMENT PARA MOSTRAR LOS MENSAJES DE EXITO O ERROR
         RenderFragment renderFragment = null!;
 
         // VERIFICAR LA EXISTENCIA DE SUCURSAL
         ApiResponse<SucursalServicioViewModel> sucursalResult = await AsistenciaService
-            .VerificarSucursal(new VerificacionSucursalRequest { IdSucursal = args });
+            .VerificarSucursal(new VerificacionSucursalRequest { IdSucursal = idSucursal });
 
         if (sucursalResult.Successful)
         {
-            // OBTENER LOS CLAIMS DE SESION PARA OBTENER EL NOMBRE DE USUARIO
-            AuthenticationState authstate = await AuthStateProvider.GetAuthenticationStateAsync();
-            ClaimsPrincipal user = authstate.User;
-            string name = user.Identity!.Name!;
-
-            // REGISTRAR LA ASISTENCIA CON LOS DATOS ANTERIORES
-            ApiResponse<RegistroAsistenciaResult> registroResult = await AsistenciaService
-                .RegistrarAsistencia(new RegistroAsistenciaRequest { Username = name, IdSucursal = sucursalResult.Result!.Id });
-
-            if (registroResult.Successful)
-            {
-                if (registroResult.Result!.EsEntrada)
-                {
-                    HideSpinKit();
-
-                    // MOSTRAR EXITO
-                    renderFragment = __builder =>
-                    {
-                        <NOAM_ASISTENCIA.Client.Shared.Alerts.AsistenciaSuccessRenderFragment Result="@registroResult.Result" />
-                    };
-
-                    await ShowSuccess(renderFragment);
-                }
-            }
-            else
-            {
-                HideSpinKit();
-
-                // MOSTRAR ERROR
-                renderFragment = __builder =>
-                {
-                    <NOAM_ASISTENCIA.Client.Shared.Alerts.ErrorAlertRenderFragment Errors="@registroResult.ErrorMessages" />
-                };
-
-                await ShowError(renderFragment);
-            }
+            await RegistrarAsistenciaApi(sucursalResult);
         }
         else
         {
-            HideSpinKit();
-
             // MOSTRAR ERROR
             renderFragment = __builder =>
             {
-                <NOAM_ASISTENCIA.Client.Shared.Alerts.ErrorAlertRenderFragment Errors="@sucursalResult.ErrorMessages" />
+                <ErrorAlertRenderFragment Errors="@sucursalResult.ErrorMessages" />
+
+                <hr class="text-black-25" />
+
+                <Row Flex="Flex.JustifyContent.End" Padding="Padding.Is5.OnX">
+                    <Button Color="Color.Danger" Clicked="HideModal">Cerrar</Button>
+                </Row>
             };
 
             await ShowError(renderFragment);
         }
+    }
+    
+    private async Task RegistrarAsistenciaApi(ApiResponse<SucursalServicioViewModel> sucursalResult)
+    {
+        // INICIALIZAR RENDER FRAGMENT PARA MOSTRAR LOS MENSAJES DE EXITO O ERROR
+        RenderFragment renderFragment = null!;
 
-        HideSpinKit();
+        // OBTENER LOS CLAIMS DE SESION PARA OBTENER EL NOMBRE DE USUARIO
+        AuthenticationState authstate = await AuthStateProvider.GetAuthenticationStateAsync();
+        ClaimsPrincipal user = authstate.User;
+        string name = user.Identity!.Name!;
+
+        // REGISTRAR LA ASISTENCIA CON LOS DATOS ANTERIORES
+        ApiResponse<RegistroAsistenciaResult> registroResult = await AsistenciaService
+            .RegistrarAsistencia(new RegistroAsistenciaRequest { Username = name, IdSucursal = sucursalResult.Result!.Id });
+
+        if (registroResult.Successful)
+        {
+            if (registroResult.Result!.EsEntrada)
+            {
+                // MOSTRAR EXITO
+                renderFragment = __builder =>
+                {
+                    <AsistenciaSuccessRenderFragment Result="@registroResult.Result" />
+
+                    <hr class="text-black-25" />
+
+                    <Row Flex="Flex.JustifyContent.End" Padding="Padding.Is5.OnX">
+                        <Button Color="Color.Primary" Clicked="HideModal">Entendido</Button>
+                    </Row>
+                };
+
+                await ShowSuccess(renderFragment);
+            }
+        }
+        else
+        {
+            // MOSTRAR ERROR
+            renderFragment = __builder =>
+            {
+                <ErrorAlertRenderFragment Errors="@registroResult.ErrorMessages" />
+
+                <hr class="text-black-25" />
+
+                <Row Flex="Flex.JustifyContent.End" Padding="Padding.Is5.OnX">
+                    <Button Color="Color.Danger" Clicked="HideModal">Cerrar</Button>
+                </Row>
+            };
+
+            await ShowError(renderFragment);
+        }
     }
 }

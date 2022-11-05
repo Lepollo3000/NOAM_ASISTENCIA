@@ -4,31 +4,33 @@
     <Button Clicked="InitLectorQR" Color="Color.Primary">Iniciar Cámara <Icon Name="IconName.Camera" /></Button>
 </Row>
 
-<Row Visibility="_rowVisibility" Flex="Flex.JustifyContent.Center">
-    <BarcodeReader @ref=_readerRef Title=""
-                   StartCameraAutomatically="false"
-                   OnBarcodeReceived="LocalReceivedBarcodeText"
-                   ShowStart="false"
-                   ShowReset="false"
-                   ShowResult="false"
-                   ShowToggleTorch="false"
-                   ShowVideoDeviceList="true"
-                   VideoWidth="400"
-                   VideoHeight="400" />
-</Row>
+<Div Display="@_rowVisibility">
+    <Row Flex="Flex.JustifyContent.Center">
+        <BarcodeReader @ref=_readerRef Title=""
+                       StartCameraAutomatically="false"
+                       OnBarcodeReceived="LocalReceivedBarcodeText"
+                       ShowStart="false"
+                       ShowReset="false"
+                       ShowResult="false"
+                       ShowToggleTorch="false"
+                       ShowVideoDeviceList="true"
+                       VideoWidth="400"
+                       VideoHeight="400" />
+    </Row>
+</Div>
 
 @code {
     [Parameter]
     public EventCallback<int> OnCodeReceived { get; set; }
 
     private BarcodeReader? _readerRef;
-    private Visibility _rowVisibility = Visibility.Invisible;
+    private IFluentDisplay _rowVisibility = Display.None;
 
     private void StartCamera() => _readerRef!.StartDecoding();
     private void StopCamera() => _readerRef!.StopDecoding();
 
-    private void ShowLectorQR() => _rowVisibility = Visibility.Visible;
-    private void HideLectorQR() => _rowVisibility = Visibility.Invisible;
+    private void ShowLectorQR() => _rowVisibility = Display.Always;
+    private void HideLectorQR() => _rowVisibility = Display.None;
 
     private void InitLectorQR()
     {
