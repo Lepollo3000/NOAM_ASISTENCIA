@@ -49,35 +49,14 @@ namespace NOAM_ASISTENCIA.Server.Controllers
             return asistencium;
         }
 
-        // PUT: api/Asistencias/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsistencium(Guid id, Asistencia asistencium)
+        private async void UpdateAsistencium(Asistencia asistencia, DateTime fechaSalida)
         {
-            if (id != asistencium.IdUsuario)
-            {
-                return BadRequest();
-            }
+            // ACTUALIZAR LA FECHA DE SALIDA
+            asistencia.FechaSalida = fechaSalida;
 
-            _dbcontext.Entry(asistencium).State = EntityState.Modified;
+            _dbcontext.Entry(asistencia).State = EntityState.Modified;
 
-            try
-            {
-                await _dbcontext.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                /*if (!AsistenciumExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }*/
-            }
-
-            return NoContent();
+            await _dbcontext.SaveChangesAsync();
         }
 
         // POST: api/Asistencias
@@ -85,18 +64,76 @@ namespace NOAM_ASISTENCIA.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsistencium(RegistroAsistenciaRequest model)
         {
+            // SE INICIALIZA EL OBJETO DE RESPUESTA DEL ENDPOINT
             var response = new ApiResponse<RegistroAsistenciaResult>();
 
-            var user = await _userManager.FindByNameAsync(model.Username);
-            var sucursal = await _dbcontext.SucursalServicios.FindAsync(model.IdSucursal);
+            // SE OBTIENEN EL USUARIO Y LA SUCURSAL CON LOS QUE SE DESEA REGISTRAR ASISTENCIA
+            // (SI ES QUE EXISTEN)
+            ApplicationUser? user = await _userManager.FindByNameAsync(model.Username);
+            SucursalServicio? sucursal = await _dbcontext.SucursalServicios.FindAsync(model.IdSucursal);
 
+            // SI SI EXISTEN
             if (user != null && sucursal != null)
             {
+                // SE OBTIENEN LAS ASISTENCIAS CON ENTRADAS DE ASISTENCIA YA MARCADAS EN EL DIA
+                // (SI ES QUE EXISTEN)
+                Asistencia? asistenciaExistente = await _dbcontext.Asistencia
+                    .Where(a =>
+                        a.IdUsuario == user.Id &&
+                        a.IdSucursal == sucursal.Id &&
+                        //a.FechaEntrada == hoy &&
+                        //a.FechaEntrada <= DateTime.Today.AddDays(1) &&
+                        a.FechaSalida == null
+                    ).OrderByDescending(a => a.FechaEntrada).FirstOrDefaultAsync();
+
+                // SI SI EXISTEN
+                if (asistenciaExistente != null)
+                {
+                    if (asistenciaExistente.FechaEntrada.Date == DateTime.Today)
+                    {
+                        DateTime fechaSalida = DateTime.Now;
+
+                        try
+                        {
+                            // ACTUALIZAR LA FECHA DE SALIDA Y REGRESAR LA FECHA DE SALIDA
+                            // ACTUALIZAR LA FECHA DE SALIDA
+                            asistenciaExistente.FechaSalida = fechaSalida;
+
+                            _dbcontext.Entry(asistenciaExistente).State = EntityState.Modified;
+
+                            await _dbcontext.SaveChangesAsync();
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            // ERROR
+                            var errors = new List<string>() { "Lo sentimos. Error interno del servidor, inténtelo de nuevo más tarde." };
+
+                            response.Successful = false;
+                            response.Result = null;
+                            response.ErrorMessages = errors;
+
+                            return Conflict(response);
+                        }
+
+                        // EXITO
+                        response.Successful = true;
+                        response.Result = new RegistroAsistenciaResult()
+                        {
+                            Sucursal = sucursal.Descripcion,
+                            Username = user.UserName,
+                            Fecha = fechaSalida,
+                            EsEntrada = false
+                        };
+
+                        return Ok(response);
+                    }
+                }
+
                 var asistencia = new Asistencia()
                 {
                     IdUsuario = user.Id,
                     IdSucursal = sucursal.Id,
-                    FechaEntrada = DateTime.UtcNow
+                    FechaEntrada = DateTime.Now
                 };
 
                 _dbcontext.Asistencia.Add(asistencia);
@@ -129,6 +166,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                     }
                 }
 
+                // EXITO
                 response.Successful = true;
                 response.Result = new RegistroAsistenciaResult()
                 {
@@ -138,7 +176,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                     EsEntrada = true
                 };
 
-                return CreatedAtAction("GetAsistencia", new { id = asistencia.IdUsuario }, response);
+                return CreatedAtAction("GetAsistencia", new { username = user.UserName }, response);
             }
             else
             {

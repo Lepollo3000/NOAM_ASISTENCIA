@@ -58,12 +58,12 @@
     {
         // MOSTRAR QUE SE ESTA HACIENDO LA ACCION PERO VA A TARDAR
         ShowSpinKit();
-        
+
         await VerificarSucursal(args);
 
         HideSpinKit();
     }
-    
+
     private async Task VerificarSucursal(int idSucursal)
     {
         // INICIALIZAR RENDER FRAGMENT PARA MOSTRAR LOS MENSAJES DE EXITO O ERROR
@@ -94,7 +94,7 @@
             await ShowError(renderFragment);
         }
     }
-    
+
     private async Task RegistrarAsistenciaApi(ApiResponse<SucursalServicioViewModel> sucursalResult)
     {
         // INICIALIZAR RENDER FRAGMENT PARA MOSTRAR LOS MENSAJES DE EXITO O ERROR
@@ -111,22 +111,19 @@
 
         if (registroResult.Successful)
         {
-            if (registroResult.Result!.EsEntrada)
+            // MOSTRAR EXITO
+            renderFragment = __builder =>
             {
-                // MOSTRAR EXITO
-                renderFragment = __builder =>
-                {
-                    <AsistenciaSuccessRenderFragment Result="@registroResult.Result" />
+                <AsistenciaSuccessRenderFragment Result="@registroResult.Result" />
 
-                    <hr class="text-black-25" />
+                <hr class="text-black-25" />
 
-                    <Row Flex="Flex.JustifyContent.End" Padding="Padding.Is5.OnX">
-                        <Button Color="Color.Primary" Clicked="HideModal">Entendido</Button>
-                    </Row>
-                };
+                <Row Flex="Flex.JustifyContent.End" Padding="Padding.Is5.OnX">
+                    <Button Color="Color.Primary" Clicked="HideModal">Entendido</Button>
+                </Row>
+            };
 
-                await ShowSuccess(renderFragment);
-            }
+            await ShowSuccess(renderFragment);
         }
         else
         {
