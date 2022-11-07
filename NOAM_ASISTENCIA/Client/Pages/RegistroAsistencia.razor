@@ -1,7 +1,21 @@
-﻿@page "/asistencia"
+﻿@page "/asistencia/registro"
 
-<h3>RegistroAsistencia</h3>
+<SfGrid TValue="RegistroAsistenciaResult" AllowPaging="true">
+    <SfDataManager Url="api/asistencias" Adaptor="Adaptors.ODataV4Adaptor"></SfDataManager>
+    <GridColumns>
+        <GridColumn Field=@nameof(RegistroAsistenciaResult.Username) HeaderText="Customer Name" Width="150"></GridColumn>
+        <GridColumn Field=@nameof(RegistroAsistenciaResult.Fecha) HeaderText=" Order Date" Format="d" Type="ColumnType.Date" TextAlign="TextAlign.Right" Width="130"></GridColumn>
+        <GridColumn Field=@nameof(RegistroAsistenciaResult.Sucursal) HeaderText="Freight" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+    </GridColumns>
+</SfGrid>
 
 @code {
-
+    public class Order
+    {
+        public int? OrderID { get; set; }
+        public string CustomerID { get; set; }
+        public DateTime? OrderDate { get; set; }
+        public double? Freight { get; set; }
+        public string ShipCountry { get; set; }
+    }
 }

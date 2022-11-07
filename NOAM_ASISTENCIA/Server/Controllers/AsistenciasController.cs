@@ -6,6 +6,8 @@ using Blazorise;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;
@@ -17,7 +19,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AsistenciasController : ControllerBase
+    public class AsistenciasController : ODataController
     {
         private readonly ApplicationDbContext _dbcontext;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -30,9 +32,23 @@ namespace NOAM_ASISTENCIA.Server.Controllers
 
         // GET: api/Asistencias
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Asistencia>>> GetAsistencia()
+        [EnableQuery]
+        public async Task<ActionResult<IEnumerable<RegistroAsistenciaResult>>> GetAsistencia()
         {
-            return await _dbcontext.Asistencia.ToListAsync();
+            IEnumerable<RegistroAsistenciaResult> model = await _dbcontext.Asistencia
+                .Include(a => a.IdSucursalNavigation)
+                .Include(a => a.IdUsuarioNavigation)
+                .Select(a =>
+                    new RegistroAsistenciaResult()
+                    {
+                        Sucursal = a.IdSucursalNavigation.Descripcion,
+                        Username = a.IdUsuarioNavigation.UserName,
+                        Fecha = a.FechaEntrada,
+                        EsEntrada = false
+                    }
+                ).ToListAsync();
+
+            return Ok(model);
         }
 
         // GET: api/Asistencias/5
@@ -49,14 +65,12 @@ namespace NOAM_ASISTENCIA.Server.Controllers
             return asistencium;
         }
 
-        private async void UpdateAsistencium(Asistencia asistencia, DateTime fechaSalida)
+        private void UpdateAsistencium(Asistencia asistencia, DateTime fechaSalida)
         {
             // ACTUALIZAR LA FECHA DE SALIDA
             asistencia.FechaSalida = fechaSalida;
 
             _dbcontext.Entry(asistencia).State = EntityState.Modified;
-
-            await _dbcontext.SaveChangesAsync();
         }
 
         // POST: api/Asistencias
@@ -95,12 +109,9 @@ namespace NOAM_ASISTENCIA.Server.Controllers
 
                         try
                         {
-                            // ACTUALIZAR LA FECHA DE SALIDA Y REGRESAR LA FECHA DE SALIDA
                             // ACTUALIZAR LA FECHA DE SALIDA
-                            asistenciaExistente.FechaSalida = fechaSalida;
-
-                            _dbcontext.Entry(asistenciaExistente).State = EntityState.Modified;
-
+                            UpdateAsistencium(asistenciaExistente, fechaSalida);
+                            // GUARDAR CAMBIOS
                             await _dbcontext.SaveChangesAsync();
                         }
                         catch (DbUpdateConcurrencyException)

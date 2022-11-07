@@ -1,23 +1,33 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using NOAM_ASISTENCIA.Server;
 using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;
 using NOAM_ASISTENCIA.Server.Models.Utils.Mail;
 using NOAM_ASISTENCIA.Server.Models.Utils.MailService;
 using NOAM_ASISTENCIA.Server.Models.Utils.MailService.Interfaces;
+using NOAM_ASISTENCIA.Shared.Utils.AsistenciaModels;
 using System.Text;
-using System.Xml.Linq;
 
 // Scaffold-DbContext "Server=localhost,1433;Database=NOAM_ASISTENCIA;User Id=sa;Password=Pa55w.rd" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -DataAnnotations -Force
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+static IEdmModel GetEdmModel()
+{
+    ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+    var books = builder.EntitySet<RegistroAsistenciaResult>("Asistencias");
+    return builder.GetEdmModel();
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -59,7 +69,9 @@ builder.Services.AddSingleton(x => x.GetRequiredService<IOptions<MailSettings>>(
 
 builder.Services.AddTransient<IMailService, MailService>();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddOData(opt => 
+    opt.AddRouteComponents("odata", GetEdmModel()).Count().Filter().OrderBy().Expand().Select().SetMaxTop(null)
+);
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
