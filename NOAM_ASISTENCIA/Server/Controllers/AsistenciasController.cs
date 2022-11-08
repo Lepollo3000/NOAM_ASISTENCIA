@@ -1,25 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Blazorise;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;
+using NOAM_ASISTENCIA.Server.Models.Utils.ControllerFiltering;
 using NOAM_ASISTENCIA.Shared.Models;
 using NOAM_ASISTENCIA.Shared.Utils;
 using NOAM_ASISTENCIA.Shared.Utils.AsistenciaModels;
+using Syncfusion.Blazor.Data;
 
 namespace NOAM_ASISTENCIA.Server.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class AsistenciasController : ODataController
+    public class AsistenciasController : ControllerBase
     {
         private readonly ApplicationDbContext _dbcontext;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -31,24 +36,86 @@ namespace NOAM_ASISTENCIA.Server.Controllers
         }
 
         // GET: api/Asistencias
-        [HttpGet]
-        [EnableQuery]
-        public async Task<ActionResult<IEnumerable<RegistroAsistenciaResult>>> GetAsistencia()
+        public async Task<ActionResult<IEnumerable<AsistenciaViewModel>>> GetAsistencia()
         {
-            IEnumerable<RegistroAsistenciaResult> model = await _dbcontext.Asistencia
-                .Include(a => a.IdSucursalNavigation)
-                .Include(a => a.IdUsuarioNavigation)
-                .Select(a =>
-                    new RegistroAsistenciaResult()
-                    {
-                        Sucursal = a.IdSucursalNavigation.Descripcion,
-                        Username = a.IdUsuarioNavigation.UserName,
-                        Fecha = a.FechaEntrada,
-                        EsEntrada = false
-                    }
-                ).ToListAsync();
+            try
+            {
+                IQueryCollection queryString = Request.Query;
 
-            return Ok(model);
+                if (queryString == null)
+                    return NoContent();
+
+                IQueryable<Asistencia> dataSource = _dbcontext.Asistencia
+                    .Include(a => a.IdSucursalNavigation)
+                    .Include(a => a.IdUsuarioNavigation)
+                    .AsQueryable();
+
+                int countAll = dataSource.Count();
+
+                StringValues sSkip, sTake, sFilter, sSort;
+                int skip = (queryString.TryGetValue("$skip", out sSkip)) ? Convert.ToInt32(sSkip[0]) : 0;
+                int top = (queryString.TryGetValue("$top", out sTake)) ? Convert.ToInt32(sTake[0]) : countAll;
+                string filter = (queryString.TryGetValue("$filter", out sFilter)) ? sFilter[0] : null!;    //filter query
+                string sort = (queryString.TryGetValue("$orderby", out sSort)) ? sSort[0] : null!;         //sort query
+
+                ApplicationUser user = await _userManager.FindByNameAsync("intendente");
+                Guid userID = user.Id;
+                IEnumerable<string> userRole = await _userManager.GetRolesAsync(user);
+
+                // SI EL USUARIO QUE HIZO LA PETICION ES INTENDENTE
+                if (userRole.Contains("Intendente"))
+                {
+                    // SE ENLISTAN SOLO LAS ASISTENCIAS DEL USUARIO
+                    dataSource = dataSource.Where(ds => ds.IdUsuario == user.Id).AsQueryable();
+                }
+
+                List<DynamicLinqExpression.Filter> listFilter =
+                    ParsingFilterFormula.PrepareFilter(filter);
+
+                //Actualizacion de tabla final de filtro
+                if (listFilter.Count() > 0)
+                {
+                    Expression<Func<Asistencia, bool>> deleg = DynamicLinqExpression.ExpressionBuilder
+                        .GetExpressionFilter<Asistencia>(listFilter);
+                    dataSource = dataSource.Where(deleg);
+                }
+
+                //Proceso de sorteo
+                if (sort != null)
+                {
+                    string s = DynamicLinqExpression.GetSortString(sort);
+
+                    if (s == null)
+                        return NoContent();
+                    else if (s.Length > 0)
+                        dataSource = (IQueryable<Asistencia>)dataSource.OrderBy(s);
+                }
+
+                int countFiltered = dataSource.Count();
+                dataSource = dataSource.Skip(skip).Take(top);
+
+                IEnumerable<AsistenciaViewModel> model = await dataSource
+                    .Select(a =>
+                        new AsistenciaViewModel()
+                        {
+                            NombreSucursal = a.IdSucursalNavigation.Descripcion,
+                            Username = a.IdUsuarioNavigation.UserName,
+                            NombreUsuario = a.IdUsuarioNavigation.Nombre,
+                            ApellidoUsuario = a.IdUsuarioNavigation.Apellido,
+                            FechaEntrada = a.FechaEntrada,
+                            FechaSalida = a.FechaSalida
+                        }
+                    ).ToListAsync();
+
+                if (queryString.Keys.Contains("$inlinecount"))
+                    return Ok(new SyncfusionApiResponse() { Items = model, Count = countFiltered });
+                else
+                    return Ok(dataSource.ToListAsync());
+            }
+            catch (Exception)
+            {
+                return NoContent();
+            }
         }
 
         // GET: api/Asistencias/5

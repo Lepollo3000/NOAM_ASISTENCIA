@@ -22,13 +22,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-static IEdmModel GetEdmModel()
-{
-    ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-    var books = builder.EntitySet<RegistroAsistenciaResult>("Asistencias");
-    return builder.GetEdmModel();
-}
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -69,9 +62,7 @@ builder.Services.AddSingleton(x => x.GetRequiredService<IOptions<MailSettings>>(
 
 builder.Services.AddTransient<IMailService, MailService>();
 
-builder.Services.AddControllersWithViews().AddOData(opt => 
-    opt.AddRouteComponents("odata", GetEdmModel()).Count().Filter().OrderBy().Expand().Select().SetMaxTop(null)
-);
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
@@ -108,7 +99,6 @@ app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapRazorPages();
 app.MapControllers();
