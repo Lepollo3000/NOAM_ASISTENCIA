@@ -36,7 +36,8 @@ namespace NOAM_ASISTENCIA.Server.Controllers
         }
 
         // GET: api/Asistencias
-        public async Task<ActionResult<IEnumerable<AsistenciaViewModel>>> GetAsistencia()
+        [HttpGet("{username}")]
+        public async Task<IActionResult> GetAsistencia(string username)
         {
             try
             {
@@ -58,7 +59,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 string filter = (queryString.TryGetValue("$filter", out sFilter)) ? sFilter[0] : null!;    //filter query
                 string sort = (queryString.TryGetValue("$orderby", out sSort)) ? sSort[0] : null!;         //sort query
 
-                ApplicationUser user = await _userManager.FindByNameAsync("intendente");
+                ApplicationUser user = await _userManager.FindByNameAsync(username);
                 Guid userID = user.Id;
                 IEnumerable<string> userRole = await _userManager.GetRolesAsync(user);
 
@@ -94,7 +95,26 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 int countFiltered = dataSource.Count();
                 dataSource = dataSource.Skip(skip).Take(top);
 
-                IEnumerable<AsistenciaViewModel> model = await dataSource
+                var horasPorDia = dataSource.Select(a => new
+                {
+                    Entrada = a.FechaEntrada,
+                    Horas = a.FechaSalida != null
+                            ? (a.FechaSalida - a.FechaEntrada).Value.TotalHours : 0
+                }).Sum(a => a.Horas).GroupBy(a => a.FechaEntrada);
+
+                IEnumerable<ReporteAsistenciaGeneralDTO> response = await dataSource
+                    .Select(a =>
+                        new ReporteAsistenciaGeneralDTO()
+                        {
+                            UsuarioNombre = a.IdUsuarioNavigation.Nombre,
+                            UsuarioApellido = a.IdUsuarioNavigation.Apellido,
+                            Fecha = a.FechaEntrada,
+                            HorasLaboradas = a.FechaSalida != null
+                                ? (a.FechaSalida - a.FechaEntrada).Value.TotalHours : 0
+                        }
+                    ).ToListAsync();
+
+                /*IEnumerable<AsistenciaViewModel> response = await dataSource
                     .Select(a =>
                         new AsistenciaViewModel()
                         {
@@ -105,10 +125,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                             FechaEntrada = a.FechaEntrada,
                             FechaSalida = a.FechaSalida
                         }
-                    ).ToListAsync();
+                    ).ToListAsync();*/
 
                 if (queryString.Keys.Contains("$inlinecount"))
-                    return Ok(new SyncfusionApiResponse() { Items = model, Count = countFiltered });
+                    return Ok(new SyncfusionApiResponse() { Items = response, Count = countFiltered });
                 else
                     return Ok(dataSource.ToListAsync());
             }
@@ -118,7 +138,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
             }
         }
 
-        // GET: api/Asistencias/5
+        /*// GET: api/Asistencias/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Asistencia>> GetAsistencium(Guid id)
         {
@@ -130,7 +150,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
             }
 
             return asistencium;
-        }
+        }*/
 
         private void UpdateAsistencium(Asistencia asistencia, DateTime fechaSalida)
         {

@@ -8,7 +8,7 @@
 
                 <BarBrand>
                     <BarItem>
-                        <BarLink To="/" TextAlignment="TextAlignment.Justified">
+                        <BarLink To="" TextAlignment="TextAlignment.Justified">
                             NOAM Asistencia
                         </BarLink>
                     </BarItem>
@@ -25,6 +25,10 @@
 
                         <AuthorizeView Roles="Intendente">
                             <NavMenuIntendente />
+                        </AuthorizeView>
+
+                        <AuthorizeView Roles="Gerente">
+                            <NavMenuGerente />
                         </AuthorizeView>
                     </BarStart>
                 </BarMenu>

@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OData.Edm;
-using Microsoft.OData.ModelBuilder;
 using NOAM_ASISTENCIA.Server;
 using NOAM_ASISTENCIA.Server.Data;
 using NOAM_ASISTENCIA.Server.Models;

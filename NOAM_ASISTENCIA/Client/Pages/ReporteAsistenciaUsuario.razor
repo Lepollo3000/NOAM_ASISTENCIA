@@ -1,0 +1,39 @@
+﻿@page "/asistencia/reporte/{Username}"
+@attribute [Authorize]
+@inject NavigationManager Navigation
+@inject CustomAuthenticationStateProvider AuthStateProvider
+
+<SfGrid TValue="AsistenciaViewModel" AllowFiltering="true" Toolbar="@Toolbar" AllowSorting="true" AllowPaging="true">
+    <SfDataManager Url="@($"api/asistencias/{Username}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+    <GridEditSettings AllowAdding="false" AllowDeleting="false" AllowEditing="false"></GridEditSettings>
+    <GridPageSettings PageSize="10"></GridPageSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(AsistenciaViewModel.NombreUsuario) HeaderText="Nombre" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(AsistenciaViewModel.ApellidoUsuario) HeaderText="Apellido" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(AsistenciaViewModel.FechaEntrada) HeaderText="Fecha Entrada" Format="yyyy/MM/dd" Type="ColumnType.Date" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(AsistenciaViewModel.FechaEntrada) HeaderText="Hora Entrada" Format="HH:mm" Type="ColumnType.Date" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(AsistenciaViewModel.FechaSalida) HeaderText="Fecha Salida" Format="yyyy/MM/dd" Type="ColumnType.Date" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(AsistenciaViewModel.FechaSalida) HeaderText="Hora Salida" Format="HH:mm" Type="ColumnType.Date" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(AsistenciaViewModel.NombreSucursal) HeaderText="Servicio" Width="100"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    [Parameter]
+    public string Username { get; set; }
+
+    private List<string> Toolbar = new List<string> { "Add", "Edit", "Delete", "Update", "Cancel", "Search" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        CheckIfParameterNull();
+    }
+
+    private void CheckIfParameterNull()
+    {
+        if (Username != null)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+}

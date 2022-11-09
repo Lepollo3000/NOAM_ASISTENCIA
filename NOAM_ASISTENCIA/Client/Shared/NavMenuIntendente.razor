@@ -1,24 +1,8 @@
-﻿<BarItem>
-    <BarBrand>
-        <BarItem>
-            Administrador
-        </BarItem>
-    </BarBrand>
-    <Divider />
+﻿<BarDropdownDivider />
+
+<BarItem>
     <BarLink To="asistencia/registrar">
-        Registrar asistencia <BarIcon IconName="@("fa-truck")" Margin="Margin.Is1.FromEnd" />
+        <Div Style="float: left;">Registrar asistencia</Div>
+        <BarIcon IconName="@("fa-clipboard")" Style="float: right; margin-right: 25px;" />
     </BarLink>
 </BarItem>
-@*
-<BarDropdown>
-    <BarDropdownToggle>
-        Administración
-        <BarIcon IconName="@("fa-users")" Float="Float.End" Margin="Margin.Is1.FromEnd" />
-    </BarDropdownToggle>
-    <BarDropdownMenu>
-        <BarDropdownItem To="asistencia/qr">
-
-        </BarDropdownItem>
-    </BarDropdownMenu>
-</BarDropdown>
-*@
