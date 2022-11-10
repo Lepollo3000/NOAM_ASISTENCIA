@@ -7,6 +7,7 @@
     <SfGrid TValue="ReporteAsistenciaGeneralDTO" AllowFiltering="true" AllowSorting="true" AllowPaging="true">
         <SfDataManager Url="@($"api/asistencias/{Username}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
         <GridEditSettings AllowAdding="false" AllowDeleting="false" AllowEditing="false"></GridEditSettings>
+        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridColumns>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioNombre) HeaderText="Nombre" Width="100"></GridColumn>
