@@ -95,13 +95,23 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 int countFiltered = dataSource.Count();
                 dataSource = dataSource.Skip(skip).Take(top);
 
-                var horasPorDia = dataSource.Select(a => new
-                {
-                    Entrada = a.FechaEntrada,
-                    Horas = a.FechaSalida != null
-                            ? (a.FechaSalida - a.FechaEntrada).Value.TotalHours : 0
-                }).Sum(a => a.Horas).GroupBy(a => a.FechaEntrada);
-
+                var horasPorDia = dataSource
+                    .Where(a => a.FechaSalida != null)
+                    /*.GroupBy(a => a.FechaEntrada.Date)
+                    .Select(b => new
+                        {
+                            Entrada = b.First().FechaEntrada.Date,
+                            Horas = b.Sum(c =>  (c.FechaSalida  - c.FechaEntrada).Value.TotalHours )
+                        }
+                    )*/.ToList();
+                var horasPorDia2 = horasPorDia.GroupBy(a => a.FechaEntrada.Date)
+                    .Select(b =>
+                        new
+                        {
+                            Entrada = b.First().FechaEntrada.Date,
+                            Horas = b.Sum(c => (c.FechaSalida - c.FechaEntrada).Value.TotalHours)
+                        }
+                    );
                 IEnumerable<ReporteAsistenciaGeneralDTO> response = await dataSource
                     .Select(a =>
                         new ReporteAsistenciaGeneralDTO()
