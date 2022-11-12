@@ -5,7 +5,7 @@
 @if (Username != null)
 {
     <SfGrid TValue="ReporteAsistenciaGeneralDTO" AllowFiltering="true" AllowSorting="true" AllowPaging="true">
-        <SfDataManager Url="@($"api/asistencias/{Username}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+        <SfDataManager Url="@($"api/asistencias/{Username}/{null}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
         <GridEditSettings AllowAdding="false" AllowDeleting="false" AllowEditing="false"></GridEditSettings>
         <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
         <GridPageSettings PageSize="10"></GridPageSettings>
@@ -13,7 +13,7 @@
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioNombre) HeaderText="Nombre" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioApellido) HeaderText="Apellido" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.Fecha) HeaderText="Fecha Entrada" Format="yyyy/MM/dd" Type="ColumnType.Date" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.HorasLaboradas) HeaderText="Horas Laboradas" Type="ColumnType.Number" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.HorasLaboradas) HeaderText="Horas Laboradas" Format="##.##" Type="ColumnType.Number" Width="100"></GridColumn>
         </GridColumns>
     </SfGrid>
 }

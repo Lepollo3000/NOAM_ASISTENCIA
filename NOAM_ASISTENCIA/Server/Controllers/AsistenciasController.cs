@@ -36,8 +36,8 @@ namespace NOAM_ASISTENCIA.Server.Controllers
         }
 
         // GET: api/Asistencias
-        [HttpGet("{username}")]
-        public async Task<IActionResult> GetAsistencia(string username)
+        [HttpGet("{requestingUsername}/{requestedUsername}")]
+        public async Task<IActionResult> GetAsistencia(string requestingUsername, string requestedUsername = null!)
         {
             try
             {
@@ -59,7 +59,8 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 string filter = (queryString.TryGetValue("$filter", out sFilter)) ? sFilter[0] : null!;    //filter query
                 string sort = (queryString.TryGetValue("$orderby", out sSort)) ? sSort[0] : null!;         //sort query
 
-                ApplicationUser user = await _userManager.FindByNameAsync(username);
+                // OBTENER LOS DATOS DEL USUARIO QUE HACE LA SOLICITUD
+                ApplicationUser user = await _userManager.FindByNameAsync(requestingUsername);
                 Guid userID = user.Id;
                 IEnumerable<string> userRole = await _userManager.GetRolesAsync(user);
 
@@ -76,15 +77,15 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                     {
                         if (item.PropertyName == "Fecha")
                         {
-                            string[] kk = item.Value.ToString()!.Split(" ", 3);
-                            DateTime date = DateTime.Parse(kk[1]);
+                            string[] dateString = item.Value.ToString()!.Split(" ", 3);
+                            DateTime date = DateTime.Parse(dateString[1]);
 
                             dataSource = dataSource.Where(d => d.FechaEntrada.Date == date);
                         }
                     }
                 }
 
-                //Proceso de sorteo
+                /*//Proceso de sorteo
                 if (sort != null)
                 {
                     string s = DynamicLinqExpression.GetSortString(sort);
@@ -93,7 +94,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                         return NoContent();
                     else if (s.Length > 0)
                         dataSource = (IQueryable<Asistencia>)dataSource.OrderBy(sort);
-                }
+                }*/
 
                 // SI EL USUARIO QUE HIZO LA PETICION ES INTENDENTE
                 if (userRole.Contains("Intendente"))
@@ -102,27 +103,18 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                     dataSource = dataSource.Where(ds => ds.IdUsuario == user.Id).AsQueryable();
                 }
 
-                // SE AGRUPAN LOS REGISTROS CON RESPECTO A LA FECHA PARA MANEJAR TODO POR DIA
-                IEnumerable<Asistencia> groupedDataSource = dataSource.ToList();
+                // SE HACE EL QUERY PARA INSTANCIAR LA INFORMACION
+                IEnumerable<Asistencia> listedDataSource = dataSource.ToList();
 
                 // SE OBTIENE EL CONTEO DE LOS REGISTROS AGRUPADOS TOTALES Y SE FILTRA EL PAGINADO
-                int countFiltered = groupedDataSource.Count();
-                groupedDataSource = groupedDataSource.Skip(skip).Take(top);
+                int countFiltered = listedDataSource.Count();
+                listedDataSource = listedDataSource.Skip(skip).Take(top);
 
-                // SE HACE EL QUERY PARA INSTANCIAR LA INFORMACION
+                // SE AGRUPAN LOS REGISTROS CON RESPECTO A LA FECHA PARA MANEJAR TODO POR DIA
                 IEnumerable<IGrouping<DateTime, Asistencia>> groupedData =
-                    groupedDataSource.GroupBy(a => a.FechaEntrada.Date).ToList();
+                    listedDataSource.GroupBy(a => a.FechaEntrada.Date).ToList();
 
-                /*var horasPorDia2 = horasPorDia
-                    .Select(b =>
-                        new
-                        {
-                            Entrada = b.First().FechaEntrada.Date,
-                            Horas = b.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
-                        }
-                    );*/
-
-                var response = groupedData
+                IEnumerable<ReporteAsistenciaGeneralDTO?> response = groupedData
                     .Select(a => a.Where(b => b.FechaSalida != null)
                         .Select(c =>
                             new ReporteAsistenciaGeneralDTO()
@@ -135,22 +127,17 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                         ).FirstOrDefault()
                     ).Where(a => a != null).ToList();
 
-                /*IEnumerable<AsistenciaViewModel> response = await dataSource
-                    .Select(a =>
-                        new AsistenciaViewModel()
-                        {
-                            NombreSucursal = a.IdSucursalNavigation.Descripcion,
-                            Username = a.IdUsuarioNavigation.UserName,
-                            NombreUsuario = a.IdUsuarioNavigation.Nombre,
-                            ApellidoUsuario = a.IdUsuarioNavigation.Apellido,
-                            FechaEntrada = a.FechaEntrada,
-                            FechaSalida = a.FechaSalida
-                        }
-                    ).ToListAsync();*/
-                if (queryString.Keys.Contains("$inlinecount"))
-                    return Ok(new SyncfusionApiResponse() { Items = response, Count = countFiltered });
+                if (response != null)
+                {
+                    if (queryString.Keys.Contains("$inlinecount"))
+                        return Ok(new SyncfusionApiResponse() { Items = response!, Count = countFiltered });
+                    else
+                        return Ok(dataSource.ToListAsync());
+                }
                 else
-                    return Ok(dataSource.ToListAsync());
+                {
+                    return NoContent();
+                }
             }
             catch (Exception)
             {
