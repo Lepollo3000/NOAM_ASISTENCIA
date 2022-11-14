@@ -137,9 +137,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 // SE HACE EL QUERY PARA INSTANCIAR LA INFORMACION
                 IEnumerable<Asistencia> listedDataSource = dataSource.ToList();
 
-                // SE OBTIENE EL CONTEO DE LOS REGISTROS AGRUPADOS TOTALES Y SE FILTRA EL PAGINADO
                 int countFiltered = listedDataSource.Count();
-                listedDataSource = listedDataSource.Skip(skip).Take(top);
 
                 IEnumerable<object?> response = null!;
 
@@ -159,13 +157,16 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                     {
                         // SE AGRUPAN LOS REGISTROS CON RESPECTO AL USUARIO Y SE FILTRA POR RANGO DE DIAS
                         IEnumerable<IGrouping<Guid, Asistencia>> groupedData = listedDataSource
+                            .Where(b => b.FechaSalida != null)
                             .Where(a => a.FechaEntrada >= minDate)
                             .Where(a => a.FechaEntrada <= maxDate)
                             .GroupBy(a => a.IdUsuario).ToList();
 
+                        countFiltered = groupedData.Count();
+
                         // QUEDAN LOS REGISTROS POR USUARIO EN UN DETERMINADO RANGO DE DIAS
                         response = groupedData
-                            .Select(a => a.Where(b => b.FechaSalida != null)
+                            .Select(a => a
                                 .Select(c =>
                                     new ReporteAsistenciaGeneralDTO()
                                     {
@@ -182,11 +183,17 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                     {
                         // SE AGRUPAN LOS REGISTROS CON RESPECTO AL USUARIO
                         IEnumerable<IGrouping<Guid, Asistencia>> groupedData = listedDataSource
+                            .Where(b => b.FechaSalida != null)
                             .GroupBy(a => a.IdUsuario).ToList();
 
-                        // QUEDAN LOS REGISTROS POR USUARIO EN UN DETERMINADO RANGO DE DIAS
+                        countFiltered = groupedData.Count();
+
+                        /*groupedData = groupedData
+                            .Select(a => a.Where(b => b.FechaSalida != null));
+
+                        // QUEDAN LOS REGISTROS POR USUARIO EN UN DETERMINADO RANGO DE DIAS*/
                         response = groupedData
-                            .Select(a => a.Where(b => b.FechaSalida != null)
+                            .Select(a => a
                                 .Select(c =>
                                     new ReporteAsistenciaGeneralDTO()
                                     {
@@ -207,16 +214,19 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                     {
                         // SE AGRUPAN LOS REGISTROS CON RESPECTO A LA FECHA PARA MANEJAR TODO POR DIA
                         // Y SE FILTRA CON EL USUARIO DADO POR LA SOLICITUD, ADEMAS DEL RANGO DE FECHAS
-                        IEnumerable<IGrouping<DateTime, Asistencia>> groupedData = listedDataSource
-                        .Where(a => a.IdUsuario == requestedUser.Id)
-                        .Where(a => a.FechaEntrada >= minDate)
-                        .Where(a => a.FechaEntrada <= maxDate)
-                        .GroupBy(a => a.FechaEntrada.Date)
-                        .ToList();
+                        IEnumerable<Asistencia> groupedData = listedDataSource
+                            //.Where(b => b.FechaSalida != null)
+                            .Where(a => a.IdUsuario == requestedUser.Id)
+                            .Where(a => a.FechaEntrada >= minDate)
+                            .Where(a => a.FechaEntrada <= maxDate)
+                            //.GroupBy(a => a.FechaEntrada.Date)
+                            .ToList();
+
+                        countFiltered = groupedData.Count();
 
                         // QUEDAN LOS REGISTROS POR DIA EN UN DETERMINADO RANGO DE TIEMPO
                         response = groupedData
-                            .Select(a => a.Where(b => b.FechaSalida != null)
+                            //.Select(a => a
                                 .Select(c =>
                                     new ReporteAsistenciaGeneralUsuarioDTO()
                                     {
@@ -224,25 +234,29 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                                         UsuarioNombre = c.IdUsuarioNavigation.Nombre,
                                         UsuarioApellido = c.IdUsuarioNavigation.Apellido,
                                         Fecha = c.FechaEntrada,
-                                        FechaSalida = c.FechaSalida!.Value,
-                                        HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
+                                        FechaSalida = c.FechaSalida,
+                                        HorasLaboradas = c.FechaSalida != null 
+                                            ? (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours
+                                            : 0
                                     }
-                                ).FirstOrDefault()
+                                //).FirstOrDefault()
                             ).Where(a => a != null).ToList();
                     }
                     else
                     {
                         // SE AGRUPAN LOS REGISTROS CON RESPECTO A LA FECHA PARA MANEJAR TODO POR DIA
                         // Y SE FILTRA CON EL USUARIO DADO POR LA SOLICITUD
-                        IEnumerable<IGrouping<DateTime, Asistencia>> groupedData = listedDataSource
-                        .Where(a => a.IdUsuario == requestedUser.Id)
-                        .GroupBy(a => a.FechaEntrada.Date)
-                        .ToList();
+                        IEnumerable<Asistencia> groupedData = listedDataSource
+                            //.Where(b => b.FechaSalida != null)
+                            .Where(a => a.IdUsuario == requestedUser.Id)
+                            //.GroupBy(a => a.FechaEntrada.Date)
+                            .ToList();
 
+                        countFiltered = groupedData.Count();
 
                         // QUEDAN LOS REGISTROS POR USUARIO EN UN DETERMINADO RANGO DE DIAS
                         response = groupedData
-                            .Select(a => a.Where(b => b.FechaSalida != null)
+                            //.Select(a => a
                                 .Select(c =>
                                     new ReporteAsistenciaGeneralUsuarioDTO()
                                     {
@@ -250,13 +264,18 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                                         UsuarioNombre = c.IdUsuarioNavigation.Nombre,
                                         UsuarioApellido = c.IdUsuarioNavigation.Apellido,
                                         Fecha = c.FechaEntrada,
-                                        FechaSalida = c.FechaSalida!.Value,
-                                        HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
+                                        FechaSalida = c.FechaSalida,
+                                        HorasLaboradas = c.FechaSalida != null
+                                            ? (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours
+                                            : 0
                                     }
-                                ).FirstOrDefault()
+                                //).FirstOrDefault()
                             ).Where(a => a != null).ToList();
                     }
                 }
+
+                // SE OBTIENE EL CONTEO DE LOS REGISTROS AGRUPADOS TOTALES Y SE FILTRA EL PAGINADO
+                response = response.Skip(skip).Take(top);
 
                 if (response != null)
                 {
