@@ -69,6 +69,8 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 DateTime? minDate = null!;
                 DateTime? maxDate = null!;
 
+                bool esIntendente = false;
+
                 List<DynamicLinqExpression.Filter> listFilter =
                     ParsingFilterFormula.PrepareFilter(filter);
 
@@ -132,6 +134,8 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 {
                     // SE ENLISTAN SOLO LAS ASISTENCIAS DEL USUARIO
                     dataSource = dataSource.Where(ds => ds.IdUsuario == requestingUser.Id).AsQueryable();
+
+                    esIntendente = true;
                 }
 
                 // SE HACE EL QUERY PARA INSTANCIAR LA INFORMACION
@@ -147,8 +151,78 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 if (requestedUsername != null)
                     requestedUser = await _userManager.FindByNameAsync(requestedUsername);
 
+                // SI ES UN INTENDENTE EL QUE HACE LA SOLICITUD
+                if (esIntendente)
+                {
+                    if (minDate != null && maxDate != null)
+                    {
+                        // SE AGRUPAN LOS REGISTROS CON RESPECTO A LA FECHA PARA MANEJAR TODO POR DIA
+                        // Y SE FILTRA CON EL USUARIO DADO POR LA SOLICITUD, ADEMAS DEL RANGO DE FECHAS
+                        IEnumerable<Asistencia> groupedData = listedDataSource
+                            //.Where(b => b.FechaSalida != null)
+                            .Where(a => a.FechaEntrada >= minDate)
+                            .Where(a => a.FechaEntrada <= maxDate)
+                            //.GroupBy(a => a.FechaEntrada.Date)
+                            .ToList();
+
+                        countFiltered = groupedData.Count();
+
+                        // QUEDAN LOS REGISTROS POR DIA EN UN DETERMINADO RANGO DE TIEMPO
+                        response = groupedData
+                                //.Select(a => a
+                                .Select(c =>
+                                    new ReporteAsistenciaGeneralUsuarioDTO()
+                                    {
+                                        Username = c.IdUsuarioNavigation.UserName,
+                                        UsuarioNombre = c.IdUsuarioNavigation.Nombre,
+                                        UsuarioApellido = c.IdUsuarioNavigation.Apellido,
+                                        Fecha = c.FechaEntrada,
+                                        FechaSalida = c.FechaSalida,
+                                        HorasLaboradas = c.FechaSalida != null
+                                            ? (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours
+                                            : 0
+                                    }
+                            //).FirstOrDefault()
+                            ).Where(a => a != null).ToList();
+                    }
+                    else
+                    {
+                        minDate = DateTime.Today;
+                        maxDate = DateTime.Today.AddDays(1).AddSeconds(-1);
+
+                        // SE AGRUPAN LOS REGISTROS CON RESPECTO AL USUARIO
+                        IEnumerable<Asistencia> groupedData = listedDataSource
+                            //.Where(b => b.FechaSalida != null)
+                            .Where(a => a.FechaEntrada >= minDate)
+                            .Where(a => a.FechaEntrada <= maxDate)
+                            //.GroupBy(a => a.IdUsuario)
+                            .ToList();
+
+                        countFiltered = groupedData.Count();
+
+                        /*groupedData = groupedData
+                            .Select(a => a.Where(b => b.FechaSalida != null));*/
+
+                        // QUEDAN LOS REGISTROS POR USUARIO EN UN DETERMINADO RANGO DE DIAS
+                        response = groupedData
+                                //.Select(a => a
+                                .Select(c =>
+                                    new ReporteAsistenciaGeneralDTO()
+                                    {
+                                        Username = c.IdUsuarioNavigation.UserName,
+                                        UsuarioNombre = c.IdUsuarioNavigation.Nombre,
+                                        UsuarioApellido = c.IdUsuarioNavigation.Apellido,
+                                        Fecha = c.FechaEntrada.Date,
+                                        HorasLaboradas = c.FechaSalida != null
+                                            ? (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours
+                                            : 0
+                                    }
+                            //).FirstOrDefault()
+                            ).Where(a => a != null).ToList();
+                    }
+                }
                 // SI NO SE ESTA PIDIENDO UN USUARIO EN ESPECIFICO
-                if (requestedUser == null)
+                else if (requestedUser == null)
                 {
                     IEnumerable<Asistencia> listedFinalData = listedDataSource
                         .OrderByDescending(a => a.FechaEntrada).ToList();
@@ -431,7 +505,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                     EsEntrada = true
                 };
 
-                return CreatedAtAction("GetAsistencia", new { username = user.UserName }, response);
+                return Ok(response);
             }
             else
             {
