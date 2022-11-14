@@ -1,42 +1,39 @@
-﻿@page "/asistencia/reporte/usuario"
-@attribute [Authorize(Roles = "Intendente")]
+﻿@page "/asistencia/reporte/general/{RequestedUsername}"
+@attribute [Authorize(Roles = "Intendente, Gerente")]
 @inject CustomAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
 @if (Username != null)
 {
-    <SfGrid @ref=_Grid TValue="ReporteAsistenciaGeneralDTO" AllowFiltering="true" AllowSorting="false" AllowPaging="true">
-        <SfDataManager Url="@($"api/asistencias/{Username}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
-        <GridEvents OnActionBegin="OnActionBegin" TValue="ReporteAsistenciaGeneralDTO"></GridEvents>
+    <SfGrid @ref=_Grid TValue="ReporteAsistenciaGeneralUsuarioDTO" AllowFiltering="true" AllowSorting="false" AllowPaging="true">
+        <SfDataManager Url="@($"api/asistencias/{Username}?requestedUsername={RequestedUsername}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+        <GridEvents OnActionBegin="OnActionBegin" TValue="ReporteAsistenciaGeneralUsuarioDTO"></GridEvents>
         <GridEditSettings AllowAdding="false" AllowDeleting="false" AllowEditing="false"></GridEditSettings>
         <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" Operators="@Operators"></GridFilterSettings>
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridColumns>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioNombre) HeaderText="Nombre" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioApellido) HeaderText="Apellido" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.Fecha) HeaderText="Filtrado por Fecha" Format="yyyy/MM/dd" Type="ColumnType.Date" Width="100">
-                <Template>
-                    @{
-                        var registro = (context as ReporteAsistenciaGeneralDTO);
-                        <Button Color="Color.Primary" Clicked="@(()=>GetUserInfo(registro!))">Ver Detalles</Button>
-                    }
-                </Template>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.UsuarioNombre) HeaderText="Nombre" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.UsuarioApellido) HeaderText="Apellido" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.Fecha) HeaderText="Fecha y Hora de Entrada" Format="ddd, dd MMM yyy HH:mm" Type="ColumnType.Date" Width="100">
                 <FilterTemplate>
-                    <SfDateRangePicker Placeholder="Elija un rango de fechas" Width="500" ShowClearButton="true"
-                                   @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime">
+                    <SfDateRangePicker Placeholder="Fecha y Hora" Width="500" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime">
                         <DateRangePickerEvents TValue="DateTime" ValueChange="ValueChangeHandler">
                         </DateRangePickerEvents>
                     </SfDateRangePicker>
                 </FilterTemplate>
             </GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.HorasLaboradas) HeaderText="Horas Laboradas" Format="##.##" Type="ColumnType.Number" Width="100" AllowFiltering="false"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.FechaSalida) HeaderText="Fecha y Hora de Salida" Format="ddd, dd MMM yyy HH:mm" Type="ColumnType.Date" AllowFiltering="false" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.HorasLaboradas) HeaderText="Horas Laboradas" Format="##0.#" Type="ColumnType.Number" Width="100" AllowFiltering="false"></GridColumn>
         </GridColumns>
     </SfGrid>
 }
 
 @code {
+    [Parameter]
+    public string RequestedUsername { get; set; } = null!;
+
     // REFERENCIAS PARA EL DATAGRID
-    private SfGrid<ReporteAsistenciaGeneralDTO>? _Grid;
+    private SfGrid<ReporteAsistenciaGeneralUsuarioDTO>? _Grid;
     private IEnumerable<Operator> Operators = new List<Operator> { Operator.Equal, Operator.GreaterThanOrEqual };
 
     // OBTENER DIAS DE ESTE MES POR PREDETERMINADO
@@ -56,7 +53,7 @@
         Username = user.Identity!.Name!;
     }
 
-    public async Task OnActionBegin(ActionEventArgs<ReporteAsistenciaGeneralDTO> args)
+    public async Task OnActionBegin(ActionEventArgs<ReporteAsistenciaGeneralUsuarioDTO> args)
     {
         if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Filtering) && args.CurrentFilteringColumn == "Fecha")
         {
@@ -110,7 +107,7 @@
         EndDate = args.EndDate;
     }
 
-    private void GetUserInfo(ReporteAsistenciaGeneralDTO arg)
+    private void GetUserInfo(ReporteAsistenciaGeneralUsuarioDTO arg)
     {
         if (arg != null)
         {

@@ -1,24 +1,50 @@
-﻿@page "/asistencia/reporte"
-@attribute [Authorize]
+﻿@page "/asistencia/reporte/general"
+@attribute [Authorize(Roles = "Gerente")]
 @inject CustomAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
 
 @if (Username != null)
 {
-    <SfGrid TValue="ReporteAsistenciaGeneralDTO" AllowFiltering="true" AllowSorting="true" AllowPaging="true">
-        <SfDataManager Url="@($"api/asistencias/{Username}/{null}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+    <SfGrid @ref=_Grid TValue="ReporteAsistenciaGeneralDTO" AllowFiltering="true" AllowSorting="false" AllowPaging="true">
+        <SfDataManager Url="@($"api/asistencias/{Username}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+        <GridEvents OnActionBegin="OnActionBegin" TValue="ReporteAsistenciaGeneralDTO"></GridEvents>
         <GridEditSettings AllowAdding="false" AllowDeleting="false" AllowEditing="false"></GridEditSettings>
-        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" Operators="@Operators"></GridFilterSettings>
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridColumns>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioNombre) HeaderText="Nombre" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioApellido) HeaderText="Apellido" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.Fecha) HeaderText="Fecha Entrada" Format="yyyy/MM/dd" Type="ColumnType.Date" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.HorasLaboradas) HeaderText="Horas Laboradas" Format="##.##" Type="ColumnType.Number" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.HorasLaboradas) HeaderText="Horas Laboradas" Format="##0.#" Type="ColumnType.Number" AllowFiltering="false" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.Fecha) HeaderText="Filtrado por Fecha" Format="yyyy/MM/dd" Type="ColumnType.Date" Width="100">
+                <Template>
+                    @{
+                        var registro = (context as ReporteAsistenciaGeneralDTO);
+                        <Button Color="Color.Primary" Clicked="@(()=>GetUserInfo(registro!))">Ver Detalles</Button>
+                    }
+                </Template>
+                <FilterTemplate>
+                    <SfDateRangePicker Placeholder="Elija un rango de fechas" Width="500" ShowClearButton="true"
+                                   @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime">
+                        <DateRangePickerEvents TValue="DateTime" ValueChange="ValueChangeHandler">
+                        </DateRangePickerEvents>
+                    </SfDateRangePicker>
+                </FilterTemplate>
+            </GridColumn>
         </GridColumns>
     </SfGrid>
 }
 
 @code {
+    // REFERENCIAS PARA EL DATAGRID
+    private SfGrid<ReporteAsistenciaGeneralDTO>? _Grid;
+    private IEnumerable<Operator> Operators = new List<Operator> { Operator.Equal, Operator.GreaterThanOrEqual };
+
+    // OBTENER DIAS DE ESTE MES POR PREDETERMINADO
+    private static DateTime currentDate = DateTime.Now;
+    public DateTime StartDate { get; set; } = new DateTime(currentDate.Year, currentDate.Month, 1);
+    public DateTime EndDate { get; set; } = new DateTime(currentDate.Year, currentDate.Month, DateTime.DaysInMonth(currentDate.Year, currentDate.Month));
+
+    // NOMBRE DEL USUARIO CON LA SESION INICIADA
     private string Username = null!;
 
     protected override async Task OnInitializedAsync()
@@ -28,5 +54,67 @@
         ClaimsPrincipal user = authstate.User;
         // ASIGNAR EL NOMBRE A LA PROPIEDAD
         Username = user.Identity!.Name!;
+    }
+
+    public async Task OnActionBegin(ActionEventArgs<ReporteAsistenciaGeneralDTO> args)
+    {
+        if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Filtering) && args.CurrentFilteringColumn == "Fecha")
+        {
+            // CANCELAR LA ACCION DE FILTRADO PREDEFINIDA PARA PODER MODIFICARLA
+            args.Cancel = true;
+
+            if (_Grid!.FilterSettings.Columns == null)
+            {
+                _Grid!.FilterSettings.Columns = new List<GridFilterColumn>();
+            }
+            if (_Grid!.FilterSettings.Columns.Count > 0)
+            {
+                _Grid!.FilterSettings.Columns.RemoveAll(c => c.Field == "Fecha");
+            }
+
+            // OBTENER TODAS LAS COLUMNAS DEL DATAGRID
+            var columns = await _Grid!.GetColumnsAsync();
+            // BUSCAR EL UID DE LA COLUMNA FECHA
+            string fUid = columns[2].Uid;
+
+            _Grid!.FilterSettings.Columns.Add(
+                new GridFilterColumn
+                    {
+                        Field = "Fecha",
+                        Operator = Syncfusion.Blazor.Operator.GreaterThanOrEqual,
+                        Predicate = "and",
+                        Value = StartDate,
+                        Uid = fUid
+                    }
+            );
+
+            _Grid!.FilterSettings.Columns.Add(
+                new GridFilterColumn
+                    {
+                        Field = "Fecha",
+                        Operator = Syncfusion.Blazor.Operator.LessThanOrEqual,
+                        Predicate = "and",
+                        Value = EndDate.AddDays(1).AddSeconds(-1),
+                        Uid = fUid
+                    }
+            );
+
+            // AHORA SI FILTRAR LA INFORMACION
+            await _Grid!.Refresh();
+        }
+    }
+
+    public void ValueChangeHandler(RangePickerEventArgs<DateTime> args)
+    {
+        StartDate = args.StartDate;
+        EndDate = args.EndDate;
+    }
+
+    private void GetUserInfo(ReporteAsistenciaGeneralDTO arg)
+    {
+        if (arg != null)
+        {
+            NavigationManager.NavigateTo($"/asistencia/reporte/general/{arg.Username}");
+        }
     }
 }

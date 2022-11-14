@@ -18,10 +18,11 @@ using NOAM_ASISTENCIA.Shared.Models;
 using NOAM_ASISTENCIA.Shared.Utils;
 using NOAM_ASISTENCIA.Shared.Utils.AsistenciaModels;
 using Syncfusion.Blazor.Data;
+using Syncfusion.Blazor.Grids;
 
 namespace NOAM_ASISTENCIA.Server.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Intendente, Gerente")]
     [ApiController]
     [Route("api/[controller]")]
     public class AsistenciasController : ControllerBase
@@ -36,8 +37,8 @@ namespace NOAM_ASISTENCIA.Server.Controllers
         }
 
         // GET: api/Asistencias
-        [HttpGet("{requestingUsername}/{requestedUsername}")]
-        public async Task<IActionResult> GetAsistencia(string requestingUsername, string requestedUsername = null!)
+        [HttpGet("{requestingUsername}")]
+        public async Task<IActionResult> GetAsistencia(string requestingUsername, string? requestedUsername = null!)
         {
             try
             {
@@ -60,9 +61,13 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 string sort = (queryString.TryGetValue("$orderby", out sSort)) ? sSort[0] : null!;         //sort query
 
                 // OBTENER LOS DATOS DEL USUARIO QUE HACE LA SOLICITUD
-                ApplicationUser user = await _userManager.FindByNameAsync(requestingUsername);
-                Guid userID = user.Id;
-                IEnumerable<string> userRole = await _userManager.GetRolesAsync(user);
+                ApplicationUser requestingUser = await _userManager.FindByNameAsync(requestingUsername);
+                Guid userID = requestingUser.Id;
+                IEnumerable<string> userRole = await _userManager.GetRolesAsync(requestingUser);
+
+                // DATOS DE FILTRADO PRINCIPAL
+                DateTime? minDate = null!;
+                DateTime? maxDate = null!;
 
                 List<DynamicLinqExpression.Filter> listFilter =
                     ParsingFilterFormula.PrepareFilter(filter);
@@ -75,12 +80,38 @@ namespace NOAM_ASISTENCIA.Server.Controllers
 
                     foreach (var item in listFilter)
                     {
-                        if (item.PropertyName == "Fecha")
+                        if (item.PropertyName.Contains("Fecha"))
                         {
-                            string[] dateString = item.Value.ToString()!.Split(" ", 3);
-                            DateTime date = DateTime.Parse(dateString[1]);
+                            // FILTRAR EXACTAMENTE LA FECHA INDICADA
+                            if (item.Operation == DynamicLinqExpression.Op.Equals)
+                            {
+                                string[] dateString = item.Value.ToString()!.Split(" ", 3);
+                                DateTime date = DateTime.Parse(dateString[1]);
 
-                            dataSource = dataSource.Where(d => d.FechaEntrada.Date == date);
+                                dataSource = dataSource.Where(d => d.FechaEntrada.Date == date);
+                            }
+                            // FILTRAR FECHAS MENORES A LA FECHA DADA
+                            else if (item.Operation == DynamicLinqExpression.Op.LessThanOrEqual)
+                            {
+                                string[] dateString = item.Value.ToString()!.Split(" ", 3);
+                                DateTime date = DateTime.Parse(dateString[1]);
+
+                                // ASIGNAR EL VALOR A MAX DATE
+                                maxDate = date;
+
+                                dataSource = dataSource.Where(d => d.FechaEntrada.Date <= date);
+                            }
+                            // FILTRAR FECHAS MAYORES A LA FECHA DADA
+                            else if (item.Operation == DynamicLinqExpression.Op.GreaterThanOrEqual)
+                            {
+                                string[] dateString = item.Value.ToString()!.Split(" ", 3);
+                                DateTime date = DateTime.Parse(dateString[1]);
+
+                                // ASIGNAR EL VALOR A MIN DATE
+                                minDate = date;
+
+                                dataSource = dataSource.Where(d => d.FechaEntrada.Date >= date);
+                            }
                         }
                     }
                 }
@@ -100,7 +131,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 if (userRole.Contains("Intendente"))
                 {
                     // SE ENLISTAN SOLO LAS ASISTENCIAS DEL USUARIO
-                    dataSource = dataSource.Where(ds => ds.IdUsuario == user.Id).AsQueryable();
+                    dataSource = dataSource.Where(ds => ds.IdUsuario == requestingUser.Id).AsQueryable();
                 }
 
                 // SE HACE EL QUERY PARA INSTANCIAR LA INFORMACION
@@ -110,22 +141,122 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 int countFiltered = listedDataSource.Count();
                 listedDataSource = listedDataSource.Skip(skip).Take(top);
 
-                // SE AGRUPAN LOS REGISTROS CON RESPECTO A LA FECHA PARA MANEJAR TODO POR DIA
-                IEnumerable<IGrouping<DateTime, Asistencia>> groupedData =
-                    listedDataSource.GroupBy(a => a.FechaEntrada.Date).ToList();
+                IEnumerable<object?> response = null!;
 
-                IEnumerable<ReporteAsistenciaGeneralDTO?> response = groupedData
-                    .Select(a => a.Where(b => b.FechaSalida != null)
-                        .Select(c =>
-                            new ReporteAsistenciaGeneralDTO()
-                            {
-                                UsuarioNombre = c.IdUsuarioNavigation.Nombre,
-                                UsuarioApellido = c.IdUsuarioNavigation.Apellido,
-                                Fecha = c.FechaEntrada.Date,
-                                HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
-                            }
-                        ).FirstOrDefault()
-                    ).Where(a => a != null).ToList();
+                // OBTENER LOS DATOS DEL USUARIO QUE SE ESTA VERIFICANDO
+                ApplicationUser requestedUser = null!;
+
+                if (requestedUsername != null)
+                    requestedUser = await _userManager.FindByNameAsync(requestedUsername);
+
+                // SI NO SE ESTA PIDIENDO UN USUARIO EN ESPECIFICO
+                if (requestedUser == null)
+                {
+                    IEnumerable<Asistencia> listedFinalData = listedDataSource
+                        .OrderByDescending(a => a.FechaEntrada).ToList();
+
+                    if (minDate != null && maxDate != null)
+                    {
+                        // SE AGRUPAN LOS REGISTROS CON RESPECTO AL USUARIO Y SE FILTRA POR RANGO DE DIAS
+                        IEnumerable<IGrouping<Guid, Asistencia>> groupedData = listedDataSource
+                            .Where(a => a.FechaEntrada >= minDate)
+                            .Where(a => a.FechaEntrada <= maxDate)
+                            .GroupBy(a => a.IdUsuario).ToList();
+
+                        // QUEDAN LOS REGISTROS POR USUARIO EN UN DETERMINADO RANGO DE DIAS
+                        response = groupedData
+                            .Select(a => a.Where(b => b.FechaSalida != null)
+                                .Select(c =>
+                                    new ReporteAsistenciaGeneralDTO()
+                                    {
+                                        Username = c.IdUsuarioNavigation.UserName,
+                                        UsuarioNombre = c.IdUsuarioNavigation.Nombre,
+                                        UsuarioApellido = c.IdUsuarioNavigation.Apellido,
+                                        Fecha = minDate.Value.Date,
+                                        HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
+                                    }
+                                ).FirstOrDefault()
+                            ).Where(a => a != null).ToList();
+                    }
+                    else
+                    {
+                        // SE AGRUPAN LOS REGISTROS CON RESPECTO AL USUARIO
+                        IEnumerable<IGrouping<Guid, Asistencia>> groupedData = listedDataSource
+                            .GroupBy(a => a.IdUsuario).ToList();
+
+                        // QUEDAN LOS REGISTROS POR USUARIO EN UN DETERMINADO RANGO DE DIAS
+                        response = groupedData
+                            .Select(a => a.Where(b => b.FechaSalida != null)
+                                .Select(c =>
+                                    new ReporteAsistenciaGeneralDTO()
+                                    {
+                                        Username = c.IdUsuarioNavigation.UserName,
+                                        UsuarioNombre = c.IdUsuarioNavigation.Nombre,
+                                        UsuarioApellido = c.IdUsuarioNavigation.Apellido,
+                                        Fecha = c.FechaEntrada.Date,
+                                        HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
+                                    }
+                                ).FirstOrDefault()
+                            ).Where(a => a != null).ToList();
+                    }
+                }
+                // SI SI SE ESTA PIDIENDO UN USUARIO EN ESPECIFICO
+                else
+                {
+                    if (minDate != null && maxDate != null)
+                    {
+                        // SE AGRUPAN LOS REGISTROS CON RESPECTO A LA FECHA PARA MANEJAR TODO POR DIA
+                        // Y SE FILTRA CON EL USUARIO DADO POR LA SOLICITUD, ADEMAS DEL RANGO DE FECHAS
+                        IEnumerable<IGrouping<DateTime, Asistencia>> groupedData = listedDataSource
+                        .Where(a => a.IdUsuario == requestedUser.Id)
+                        .Where(a => a.FechaEntrada >= minDate)
+                        .Where(a => a.FechaEntrada <= maxDate)
+                        .GroupBy(a => a.FechaEntrada.Date)
+                        .ToList();
+
+                        // QUEDAN LOS REGISTROS POR DIA EN UN DETERMINADO RANGO DE TIEMPO
+                        response = groupedData
+                            .Select(a => a.Where(b => b.FechaSalida != null)
+                                .Select(c =>
+                                    new ReporteAsistenciaGeneralUsuarioDTO()
+                                    {
+                                        Username = c.IdUsuarioNavigation.UserName,
+                                        UsuarioNombre = c.IdUsuarioNavigation.Nombre,
+                                        UsuarioApellido = c.IdUsuarioNavigation.Apellido,
+                                        Fecha = c.FechaEntrada,
+                                        FechaSalida = c.FechaSalida!.Value,
+                                        HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
+                                    }
+                                ).FirstOrDefault()
+                            ).Where(a => a != null).ToList();
+                    }
+                    else
+                    {
+                        // SE AGRUPAN LOS REGISTROS CON RESPECTO A LA FECHA PARA MANEJAR TODO POR DIA
+                        // Y SE FILTRA CON EL USUARIO DADO POR LA SOLICITUD
+                        IEnumerable<IGrouping<DateTime, Asistencia>> groupedData = listedDataSource
+                        .Where(a => a.IdUsuario == requestedUser.Id)
+                        .GroupBy(a => a.FechaEntrada.Date)
+                        .ToList();
+
+
+                        // QUEDAN LOS REGISTROS POR USUARIO EN UN DETERMINADO RANGO DE DIAS
+                        response = groupedData
+                            .Select(a => a.Where(b => b.FechaSalida != null)
+                                .Select(c =>
+                                    new ReporteAsistenciaGeneralUsuarioDTO()
+                                    {
+                                        Username = c.IdUsuarioNavigation.UserName,
+                                        UsuarioNombre = c.IdUsuarioNavigation.Nombre,
+                                        UsuarioApellido = c.IdUsuarioNavigation.Apellido,
+                                        Fecha = c.FechaEntrada,
+                                        FechaSalida = c.FechaSalida!.Value,
+                                        HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
+                                    }
+                                ).FirstOrDefault()
+                            ).Where(a => a != null).ToList();
+                    }
+                }
 
                 if (response != null)
                 {

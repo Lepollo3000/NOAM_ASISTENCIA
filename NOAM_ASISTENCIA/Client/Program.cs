@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NDg4MTk3QDMxMzkyZTMyMmUzMEJhZlJDUXQ0c3Y1VFRpS3NnUVRMQzR5SXlaWmZiNHdGMFUzSnhQeFNiV2M9");
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NzU5ODg0QDMyMzAyZTMzMmUzMEFVemNwakM2WEZaTnZwV21ZSWxxNkFsUFVUZ1pEeStjc1RFUlNsN2ZFVGs9\r\n");
 
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");

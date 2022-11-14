@@ -393,13 +393,13 @@ namespace NOAM_ASISTENCIA.Server.Migrations
                     b.Property<int>("IdSucursal")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FechaEntrada")
+                    b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime");
 
                     b.Property<DateTime?>("FechaSalida")
                         .HasColumnType("datetime");
 
-                    b.HasKey("IdUsuario", "IdSucursal", "FechaEntrada");
+                    b.HasKey("IdUsuario", "IdSucursal", "Fecha");
 
                     b.HasIndex("IdSucursal");
 
