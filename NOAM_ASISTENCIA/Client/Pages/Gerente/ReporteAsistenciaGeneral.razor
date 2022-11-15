@@ -3,8 +3,16 @@
 @inject CustomAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
+<PageTitle>Reportes de Asistencia</PageTitle>
+
 @if (Username != null)
 {
+    Thread.CurrentThread.CurrentCulture = new CultureInfo("es-ES");
+
+    <Heading Size="HeadingSize.Is4">Reportes de asistencia</Heading>
+    <Paragraph>Desde: @StartDate.ToString("ddd dd MMM yyy")</Paragraph>
+    <Paragraph>Hasta: @EndDate.ToString("ddd dd MMM yyy")</Paragraph>
+
     <SfGrid @ref=_Grid TValue="ReporteAsistenciaGeneralDTO" AllowFiltering="true" AllowSorting="false" AllowPaging="true">
         <SfDataManager Url="@($"api/asistencias/{Username}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
         <GridEvents OnActionBegin="OnActionBegin" TValue="ReporteAsistenciaGeneralDTO"></GridEvents>
@@ -15,6 +23,7 @@
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioNombre) HeaderText="Nombre" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.UsuarioApellido) HeaderText="Apellido" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.HorasLaboradas) HeaderText="Horas Laboradas" Format="##0.#" Type="ColumnType.Number" AllowFiltering="false" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.Sucursal) HeaderText="Servicio" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralDTO.Fecha) HeaderText="Filtrado por Fecha" Format="yyyy/MM/dd" Type="ColumnType.Date" Width="100">
                 <Template>
                     @{
@@ -23,8 +32,7 @@
                     }
                 </Template>
                 <FilterTemplate>
-                    <SfDateRangePicker Placeholder="Elija un rango de fechas" Width="500" ShowClearButton="true"
-                                   @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime">
+                    <SfDateRangePicker Placeholder="Elija un rango de fechas" Width="500" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime">
                         <DateRangePickerEvents TValue="DateTime" ValueChange="ValueChangeHandler">
                         </DateRangePickerEvents>
                     </SfDateRangePicker>
@@ -49,6 +57,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Thread.CurrentThread.CurrentCulture = new CultureInfo("es-ES");
+
         // OBTENER LOS CLAIMS DE SESION PARA OBTENER EL NOMBRE DE USUARIO
         AuthenticationState authstate = await AuthStateProvider.GetAuthenticationStateAsync();
         ClaimsPrincipal user = authstate.User;
@@ -75,7 +85,7 @@
             // OBTENER TODAS LAS COLUMNAS DEL DATAGRID
             var columns = await _Grid!.GetColumnsAsync();
             // BUSCAR EL UID DE LA COLUMNA FECHA
-            string fUid = columns[3].Uid;
+            string fUid = columns[4].Uid;
 
             _Grid!.FilterSettings.Columns.Add(
                 new GridFilterColumn

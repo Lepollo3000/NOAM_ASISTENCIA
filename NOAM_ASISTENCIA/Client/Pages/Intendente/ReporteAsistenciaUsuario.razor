@@ -3,8 +3,16 @@
 @inject CustomAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
+<PageTitle>Reportes de Asistencia</PageTitle>
+
 @if (Username != null)
 {
+    Thread.CurrentThread.CurrentCulture = new CultureInfo("es-ES");
+
+    <Heading Size="HeadingSize.Is4">Reporte de asistencia para @Username</Heading>
+    <Paragraph>Desde: @StartDate.ToString("ddd dd MMM yyy")</Paragraph>
+    <Paragraph>Hasta: @EndDate.ToString("ddd dd MMM yyy")</Paragraph>
+
     <SfGrid @ref=_Grid TValue="ReporteAsistenciaGeneralUsuarioDTO" AllowFiltering="true" AllowSorting="false" AllowPaging="true">
         <SfDataManager Url="@($"api/asistencias/{Username}")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
         <GridEvents OnActionBegin="OnActionBegin" TValue="ReporteAsistenciaGeneralUsuarioDTO"></GridEvents>
@@ -14,7 +22,8 @@
         <GridColumns>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.UsuarioNombre) HeaderText="Nombre" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.UsuarioApellido) HeaderText="Apellido" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.Fecha) HeaderText="Fecha" Format="ddd, dd MMM yyy" Type="ColumnType.Date" Width="100">
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.Sucursal) HeaderText="Servicio" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.Fecha) HeaderText="Fecha" Format="ddd dd MMM yyy" Type="ColumnType.Date" Width="100">
                 <FilterTemplate>
                     <SfDateRangePicker Placeholder="Fecha y Hora" Width="500" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime">
                         <DateRangePickerEvents TValue="DateTime" ValueChange="ValueChangeHandler">
@@ -35,15 +44,16 @@
     private IEnumerable<Operator> Operators = new List<Operator> { Operator.Equal, Operator.GreaterThanOrEqual };
 
     // OBTENER DIAS DE ESTE MES POR PREDETERMINADO
-    private static DateTime currentDate = DateTime.Now;
-    public DateTime StartDate { get; set; } = new DateTime(currentDate.Year, currentDate.Month, 1);
-    public DateTime EndDate { get; set; } = new DateTime(currentDate.Year, currentDate.Month, DateTime.DaysInMonth(currentDate.Year, currentDate.Month));
+    public DateTime StartDate { get; set; } = DateTime.Today;
+    public DateTime EndDate { get; set; } = DateTime.Today.AddDays(1).AddSeconds(-1);
 
     // NOMBRE DEL USUARIO CON LA SESION INICIADA
     private string Username = null!;
 
     protected override async Task OnInitializedAsync()
     {
+        Thread.CurrentThread.CurrentCulture = new CultureInfo("es-ES");
+
         // OBTENER LOS CLAIMS DE SESION PARA OBTENER EL NOMBRE DE USUARIO
         AuthenticationState authstate = await AuthStateProvider.GetAuthenticationStateAsync();
         ClaimsPrincipal user = authstate.User;
@@ -70,7 +80,7 @@
             // OBTENER TODAS LAS COLUMNAS DEL DATAGRID
             var columns = await _Grid!.GetColumnsAsync();
             // BUSCAR EL UID DE LA COLUMNA FECHA
-            string fUid = columns[2].Uid;
+            string fUid = columns[3].Uid;
 
             _Grid!.FilterSettings.Columns.Add(
                 new GridFilterColumn
