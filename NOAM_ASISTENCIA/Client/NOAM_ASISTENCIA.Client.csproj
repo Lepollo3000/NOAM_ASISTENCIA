@@ -1,43 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+		<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BlazorBarcodeScanner.ZXing.JS" Version="0.2.8" />
-    <PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
-    <PackageReference Include="Blazorise" Version="1.1.2" />
-    <PackageReference Include="Blazorise.Bootstrap" Version="1.1.2" />
-    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.1.2" />
-    <PackageReference Include="Blazorise.SpinKit" Version="1.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.10" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="Syncfusion.Blazor.Data" Version="20.3.0.52" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="20.3.0.52" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="20.3.0.52" />
-    <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BlazorBarcodeScanner.ZXing.JS" Version="0.2.8" />
+		<PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
+		<PackageReference Include="Blazorise" Version="1.1.2" />
+		<PackageReference Include="Blazorise.Bootstrap" Version="1.1.2" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.1.2" />
+		<PackageReference Include="Blazorise.SpinKit" Version="1.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.10" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+		<PackageReference Include="Syncfusion.Blazor.Data" Version="20.3.0.52" />
+		<PackageReference Include="Syncfusion.Blazor.Grid" Version="20.3.0.52" />
+		<PackageReference Include="Syncfusion.Blazor.Themes" Version="20.3.0.52" />
+		<PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Shared\NOAM_ASISTENCIA.Shared.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Shared\NOAM_ASISTENCIA.Shared.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
-  </ItemGroup>
+	<ItemGroup>
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\css\bootstrap\dist\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="wwwroot\css\bootstrap\dist\" />
+	</ItemGroup>
 
 </Project>

@@ -7,8 +7,6 @@
 
 @if (Username != null)
 {
-    Thread.CurrentThread.CurrentCulture = new CultureInfo("es-ES");
-
     <Heading Size="HeadingSize.Is4">Reporte de asistencia para @Username</Heading>
     <Paragraph>Desde: @StartDate.ToString("ddd dd MMM yyy")</Paragraph>
     <Paragraph>Hasta: @EndDate.ToString("ddd dd MMM yyy")</Paragraph>
@@ -52,8 +50,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Thread.CurrentThread.CurrentCulture = new CultureInfo("es-ES");
-
         // OBTENER LOS CLAIMS DE SESION PARA OBTENER EL NOMBRE DE USUARIO
         AuthenticationState authstate = await AuthStateProvider.GetAuthenticationStateAsync();
         ClaimsPrincipal user = authstate.User;

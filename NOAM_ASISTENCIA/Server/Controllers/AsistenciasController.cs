@@ -250,7 +250,6 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                                         Username = c.IdUsuarioNavigation.UserName,
                                         UsuarioNombre = c.IdUsuarioNavigation.Nombre,
                                         UsuarioApellido = c.IdUsuarioNavigation.Apellido,
-                                        Sucursal = c.IdSucursalNavigation.Descripcion,
                                         Fecha = minDate.Value.Date,
                                         HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
                                     }
@@ -286,7 +285,6 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                                         Username = c.IdUsuarioNavigation.UserName,
                                         UsuarioNombre = c.IdUsuarioNavigation.Nombre,
                                         UsuarioApellido = c.IdUsuarioNavigation.Apellido,
-                                        Sucursal = c.IdSucursalNavigation.Descripcion,
                                         Fecha = c.FechaEntrada.Date,
                                         HorasLaboradas = a.Sum(c => (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours)
                                     }

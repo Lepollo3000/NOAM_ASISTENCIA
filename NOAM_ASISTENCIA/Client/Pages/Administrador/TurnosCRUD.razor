@@ -1,0 +1,64 @@
+﻿@page "/turnos"
+@inject HttpClient Http;
+
+<SfGrid @ref=_Grid TValue="TurnoDTO" Toolbar="@Toolbar" AllowFiltering="true" AllowSorting="false" AllowPaging="true">
+    <SfDataManager Url="@($"api/turnos")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+    <GridEvents OnActionComplete="OnActionComplete" TValue="TurnoDTO"></GridEvents>
+    <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true" Mode="EditMode.Dialog">
+        <HeaderTemplate>
+            @{
+                var text = GetHeader((context as TurnoDTO));
+                <span>@text</span>
+            }
+        </HeaderTemplate>
+        <FooterTemplate>
+            <Button Clicked="Save" Color="Color.Primary">@ButtonText</Button>
+            <Button Clicked="Cancel">Cancelar</Button>
+        </FooterTemplate>
+    </GridEditSettings>
+    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar"></GridFilterSettings>
+    <GridPageSettings PageSize="10"></GridPageSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(TurnoDTO.Descripcion) HeaderText="Descripción" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(TurnoDTO.DescripcionCorta) HeaderText="Descripción Corta" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" Width="100"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    private SfGrid<TurnoDTO> _Grid { get; set; }
+    private List<string> Toolbar = new List<string>() { "Add", "Edit", "Delete", "Cancel", "Update" };
+    private string ButtonText { get; set; }
+
+    private string GetHeader(TurnoDTO Value)
+    {
+        if (Value.Id == null)
+        {
+            ButtonText = "Guardar";
+            return "Crear nuevo turno";
+        }
+        else
+        {
+            ButtonText = "Guardar cambios";
+            return $"Editar detales de {Value.DescripcionCorta.ToString()}";
+        }
+    }
+
+    public void OnActionComplete(ActionEventArgs<TurnoDTO> args)
+    {
+        if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Add) || args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.BeginEdit))
+        {
+            // Based on Add or Edit action disable the PreventRender.
+            args.PreventRender = false;
+        }
+    }
+
+    private async Task Cancel()
+    {
+        await _Grid.CloseEdit();     //Cancel editing action
+    }
+
+    private async Task Save()
+    {
+        await _Grid.EndEdit();       //Save the edited/added data to Grid
+    }
+}
