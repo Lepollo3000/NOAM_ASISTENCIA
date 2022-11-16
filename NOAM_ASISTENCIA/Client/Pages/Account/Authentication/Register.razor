@@ -78,6 +78,8 @@
                 </Field>
             </Validation>
 
+
+
             <Validation>
                 <Field Margin="Margin.Is3.FromBottom">
                     <FieldLabel For="@modelRequest.Password">Contraseña</FieldLabel>
@@ -124,17 +126,23 @@
 </Div>
 
 @code {
-    private Validations validationsRef = new Validations();
+    private Validations? validationsRef = new Validations();
     private RegisterRequest modelRequest = new RegisterRequest();
+    private IEnumerable<TurnoDTO> Turnos = null!;
 
     private bool showErrors;
     private bool showTurnos;
     private IEnumerable<TurnoDTO> turno = null!;
     private IEnumerable<string> errors = null!;
 
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+
     private async Task HandleSubmit()
     {
-        if (await validationsRef.ValidateAll())
+        if (await validationsRef!.ValidateAll())
         {
             await Submit();
         }

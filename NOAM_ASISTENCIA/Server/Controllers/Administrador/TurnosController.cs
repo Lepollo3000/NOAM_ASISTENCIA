@@ -51,7 +51,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
                 List<DynamicLinqExpression.Filter> listFilter =
                     ParsingFilterFormula.PrepareFilter(filter);
 
-                //Actualizacion de tabla final de filtro
+                // PROCESO DE FILTRADO
                 if (listFilter.Count() > 0)
                 {
                     Expression<Func<Turno, bool>> deleg = DynamicLinqExpression.ExpressionBuilder
@@ -60,7 +60,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
                     dataSource = dataSource.Where(deleg);
                 }
 
-                //Proceso de sorteo
+                // PROCESO DE SORTEO
                 if (sort != null)
                 {
                     string s = DynamicLinqExpression.GetSortString(sort);
@@ -72,27 +72,16 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
                 }
 
                 // SE HACE EL QUERY PARA INSTANCIAR LA INFORMACION
-                IEnumerable<Turno> listedDataSource = dataSource.ToList();
-
-                int countFiltered = listedDataSource.Count();
-
-                IEnumerable<TurnoDTO> response = listedDataSource
-                    .Select(t =>
-                        new TurnoDTO()
-                        {
-                            Id = t.Id,
-                            Descripcion = t.Descripcion,
-                            DescripcionCorta = t.DescripcionCorta
-                        }
-                    ).ToList();
+                IEnumerable<Turno> response = await dataSource.ToListAsync();
 
                 // SE OBTIENE EL CONTEO DE LOS REGISTROS AGRUPADOS TOTALES Y SE FILTRA EL PAGINADO
+                int countFiltered = response.Count();
                 response = response.Skip(skip).Take(top);
 
                 if (queryString.Keys.Contains("$inlinecount"))
                     return Ok(new SyncfusionApiResponse() { Items = response!, Count = countFiltered });
                 else
-                    return Ok(dataSource.ToListAsync());
+                    return Ok(response);
             }
             catch (Exception)
             {
@@ -123,13 +112,9 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
 
         // PUT: api/Turnos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> PutTurno(int id, Turno turno)
+        [HttpPut()]
+        public async Task<IActionResult> PutTurno(Turno turno)
         {
-            if (id != turno.Id)
-            {
-                return BadRequest();
-            }
 
             _dbcontext.Entry(turno).State = EntityState.Modified;
 
@@ -139,17 +124,17 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TurnoExists(id))
+                if (!TurnoExists(turno.Id))
                 {
                     return NotFound();
                 }
                 else
                 {
-                    throw;
+                    return StatusCode(500, "Error interno del servidor. Intente de nuevo más tarde o contacte a un administrador");
                 }
             }
 
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/Turnos
@@ -163,7 +148,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
             return CreatedAtAction("GetTurno", new { id = turno.Id }, turno);
         }
 
-        // DELETE: api/Turnos/5
+        /*// DELETE: api/Turnos/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTurno(int id)
         {
@@ -177,7 +162,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
             await _dbcontext.SaveChangesAsync();
 
             return NoContent();
-        }
+        }*/
 
         private bool TurnoExists(int id)
         {
