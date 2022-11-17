@@ -214,7 +214,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                                         UsuarioNombre = c.IdUsuarioNavigation.Nombre,
                                         UsuarioApellido = c.IdUsuarioNavigation.Apellido,
                                         Sucursal = c.IdSucursalNavigation.Descripcion,
-                                        Fecha = c.FechaEntrada.Date,
+                                        Fecha = c.FechaEntrada,
                                         FechaSalida = c.FechaSalida,
                                         HorasLaboradas = c.FechaSalida != null
                                             ? (c.FechaSalida - c.FechaEntrada)!.Value.TotalHours

@@ -31,6 +31,8 @@ builder.Services.AddOptions();
 builder.Services.AddScoped<IAccountService, AccountService>();
 // ASISTENCIA SERVICE
 builder.Services.AddScoped<IAsistenciaService, AsistenciaService>();
+// TURNOS SERVICE
+builder.Services.AddScoped<ITurnosService, TurnosService>();
 
 // CUSTOM AUTH STATE PROVIDER
 builder.Services.AddBlazoredLocalStorage();

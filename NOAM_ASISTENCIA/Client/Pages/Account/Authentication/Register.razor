@@ -1,5 +1,7 @@
 @page "/account/register"
+@attribute [Authorize(Roles = "Administrador")]
 @layout AuthLayout
+@inject ITurnosService TurnoService
 @inject IAccountService authService
 @inject NavigationManager navigationManager
 
@@ -13,15 +15,15 @@
 
 <Row>
     <Column>
-        @if (showErrors)
-        {
-            <Alert Color="Color.Danger" role="alert">
+        <Alert Color="Color.Danger" @bind-Visible="showErrors">
+            @if (showErrors)
+            {
                 @foreach (var error in errors)
                 {
                     <Paragraph class="mb-0">@error</Paragraph>
                 }
-            </Alert>
-        }
+            }
+        </Alert>
 
         <Validations @ref="validationsRef" Model="@modelRequest" Mode="ValidationMode.Auto" ValidateOnLoad="false">
             <ValidationSummary />
@@ -78,7 +80,30 @@
                 </Field>
             </Validation>
 
+            <Field Margin="Margin.Is3.FromBottom">
+                <FieldLabel>Turno</FieldLabel>
+                <FieldBody>
+                    <Autocomplete TItem="TurnoDTO"
+                                  TValue="int"
+                                  Data="@Turnos"
+                                  TextField="@(( item ) => item.Descripcion)"
+                                  ValueField="@(( item ) => item.Id)"
+                                  Filter="AutocompleteFilter.Contains"
+                                  Placeholder="Ingrese la descripción de un turno y se autocompletará"
+                                  @bind-SelectedValue="@modelRequest.IdTurno">
+                        <NotFoundContent>Lo sentimos, antes de registrar usuarios se deben registrar turnos</NotFoundContent>
+                    </Autocomplete>
+                </FieldBody>
+            </Field>
 
+            <Field Margin="Margin.Is3.FromBottom">
+                <FieldLabel>Roles</FieldLabel>
+                <FieldBody>
+                    <Check TValue="bool" CheckedChanged="@IntendenteChecked" Inline>Intendente</Check>
+                    <Check TValue="bool" CheckedChanged="@GerenteChecked" Inline>Gerente</Check>
+                    <Check TValue="bool" CheckedChanged="@AdministradorChecked" Inline>Administrador</Check>
+                </FieldBody>
+            </Field>
 
             <Validation>
                 <Field Margin="Margin.Is3.FromBottom">
@@ -119,16 +144,11 @@
     </Column>
 </Row>
 
-<Divider />
-
-<Div TextAlignment="TextAlignment.Center" Margin="Margin.Is3.FromBottom">
-    <Anchor To="/account/login">¿Ya cuentas con un usuario y contraseña? ¡Inicia sesión!</Anchor>
-</Div>
-
 @code {
     private Validations? validationsRef = new Validations();
     private RegisterRequest modelRequest = new RegisterRequest();
     private IEnumerable<TurnoDTO> Turnos = null!;
+    private List<string> Roles = null!;
 
     private bool showErrors;
     private bool showTurnos;
@@ -137,7 +157,45 @@
 
     protected override async Task OnInitializedAsync()
     {
-        
+        IEnumerable<TurnoDTO> result = await TurnoService.GetTurnos();
+
+        Turnos = result;
+    }
+
+    private void IntendenteChecked(bool value)
+    {
+        if (value)
+        {
+            Roles.Add("Intendente");
+        }
+        else
+        {
+            Roles.Remove("Intendente");
+        }
+    }
+
+    private void GerenteChecked(bool value)
+    {
+        if (value)
+        {
+            Roles.Add("Gerente");
+        }
+        else
+        {
+            Roles.Remove("Gerente");
+        }
+    }
+
+    private void AdministradorChecked(bool value)
+    {
+        if (value)
+        {
+            Roles.Add("Administrador");
+        }
+        else
+        {
+            Roles.Remove("Administrador");
+        }
     }
 
     private async Task HandleSubmit()
@@ -156,7 +214,7 @@
 
         if (result.Successful)
         {
-            navigationManager.NavigateTo($"/account/register/emailconfirmation/{modelRequest.UserName}/{modelRequest.Email}/{false}");
+            navigationManager.NavigateTo($"/users");
         }
         else
         {

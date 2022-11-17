@@ -115,7 +115,6 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
         [HttpPut()]
         public async Task<IActionResult> PutTurno(Turno turno)
         {
-
             _dbcontext.Entry(turno).State = EntityState.Modified;
 
             try

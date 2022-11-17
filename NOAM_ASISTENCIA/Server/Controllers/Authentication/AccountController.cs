@@ -41,7 +41,8 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     Email = model.Email,
                     Nombre = model.Nombres,
                     Apellido = model.Apellidos,
-                    IdTurno = model.IdTurno
+                    IdTurno = model.IdTurno,
+                    EmailConfirmed = true
                 };
                 var result = await _userManager.CreateAsync(newUser, model.Password);
 
@@ -58,14 +59,6 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     return BadRequest(badRequestResponseModel);
                 }
 
-                /*if (!await SendConfirmationEmailAsync(model, null, newUser))
-                {
-                    var errors = new List<string>() { "Error interno del servidor, inténtelo de nuevo más tarde." };
-                    var modelResultFail = new ConfirmEmailResult() { Successful = false, Errors = errors };
-
-                    return StatusCode(500, modelResultFail);
-                }*/
-
                 var okResponseModel = new ApiResponse<RegisterResult>()
                 {
                     Successful = true,
@@ -74,7 +67,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
 
                 return Ok(okResponseModel);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 var errors = new List<string>() { "Error interno del servidor, inténtelo de nuevo más tarde." };
                 var internalServerErrorResponseModel = new ApiResponse<RegisterResult>()
@@ -190,7 +183,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
 
                 return Ok(okResponseModel);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 var errors = new List<string>() { "Error interno del servidor, inténtelo de nuevo más tarde." };
                 var internalServerErrorResponseModel = new ApiResponse<ConfirmEmailResult>()
@@ -305,7 +298,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
 
                 return Ok(okResponseModel);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 var errors = new List<string>() { "Error interno del servidor, inténtelo de nuevo más tarde." };
                 var internalServerErrorResponseModel = new ApiResponse<LoginResult>()
@@ -338,7 +331,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (!noEsNuevo)
                     await _userManager.DeleteAsync(newUser);

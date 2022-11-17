@@ -1,9 +1,42 @@
 ﻿@page "/"
+@inject NavigationManager NavigationManager
+@inject CustomAuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Bienvenido</PageTitle>
 
-<h1>Hello, world!</h1>
+@if (Role != null)
+{
+    <Heading Size="HeadingSize.Is2" TextColor="TextColor.Black50">Bienvenido, usuario @Role!</Heading>
+}
 
-Welcome to your new app.
+@code {
+    // NOMBRE DEL ROL CON LA SESION INICIADA
+    private string Role = null!;
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    protected override async Task OnInitializedAsync()
+    {
+        // OBTENER LOS CLAIMS DE SESION PARA OBTENER EL NOMBRE DE USUARIO
+        AuthenticationState authstate = await AuthStateProvider.GetAuthenticationStateAsync();
+        ClaimsPrincipal user = authstate.User;
+
+        if(user.Identity!.Name == null)
+        {
+            IrAInicioDeSesion();
+        }
+        else
+        {
+            // ASIGNAR VALORES A LAS PROPIEDADES
+        if (user.IsInRole("Administrador"))
+            Role = "administrador";
+        else if (user.IsInRole("Gerente"))
+            Role = "gerente";
+        else if (user.IsInRole("Intendente"))
+            Role = "intendente";
+        }
+    }
+
+    private async Task IrAInicioDeSesion()
+    {
+        NavigationManager.NavigateTo("/account/login");
+    }
+}

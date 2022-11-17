@@ -28,5 +28,6 @@ namespace NOAM_ASISTENCIA.Shared.Utils.AuthModels
         [Compare(nameof(Password), ErrorMessage = "Las contraseñas deben coincidir.")]
         [Display(Name = "Confirmar Contraseña")]
         public string ConfirmPassword { get; set; } = null!;
+        public List<string> Roles { get; set; } = null!;
     }
 }
