@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace NOAM_ASISTENCIA.Shared.Models
 {
-    public class AsistenciaViewModel
+    public class AsistenciaDTO
     {
         public string Username { get; set; } = null!;
         public string NombreUsuario { get; set; } = null!;
