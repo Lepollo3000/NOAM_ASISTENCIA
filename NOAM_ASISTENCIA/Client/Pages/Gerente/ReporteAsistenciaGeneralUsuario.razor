@@ -18,8 +18,8 @@
         <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" Operators="@Operators"></GridFilterSettings>
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridColumns>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.UsuarioNombre) HeaderText="Nombre" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.UsuarioApellido) HeaderText="Apellido" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.UsuarioNombre) HeaderText="Nombre" AllowFiltering="false" Width="100"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.UsuarioApellido) HeaderText="Apellido" AllowFiltering="false" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.Sucursal) HeaderText="Servicio" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.Fecha) HeaderText="Fecha" Format="ddd dd MMM yyy" Type="ColumnType.Date" Width="100">
                 <FilterTemplate>
@@ -31,7 +31,7 @@
             </GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.Fecha) HeaderText="Hora de Entrada" Format="HH:mm" Type="ColumnType.Date" AllowFiltering="false" Width="100"></GridColumn>
             <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.FechaSalida) HeaderText="Hora de Salida" Format="HH:mm" Type="ColumnType.Date" AllowFiltering="false" Width="100"></GridColumn>
-            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.HorasLaboradas) HeaderText="Horas Laboradas" Format="##0.#" Type="ColumnType.Number" Width="100" AllowFiltering="false"></GridColumn>
+            <GridColumn Field=@nameof(ReporteAsistenciaGeneralUsuarioDTO.HorasLaboradas) HeaderText="Horas Laboradas" Format="##0.#" Type="ColumnType.Number" AllowFiltering="false" Width="100"></GridColumn>
         </GridColumns>
     </SfGrid>
 }

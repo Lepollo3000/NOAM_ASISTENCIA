@@ -1,14 +1,14 @@
-﻿@page "/turnos"
+﻿@page "/sucursales"
 @attribute [Authorize(Roles = "Administrador")]
 @inject HttpClient Http;
 
-<SfGrid @ref=_Grid TValue="TurnoDTO" Toolbar="@Toolbar" AllowFiltering="true" AllowSorting="false" AllowPaging="true">
-    <SfDataManager Url="@($"api/turnos")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
-    <GridEvents OnActionComplete="OnActionComplete" TValue="TurnoDTO"></GridEvents>
+<SfGrid @ref=_Grid TValue="SucursalServicioDTO" Toolbar="@Toolbar" AllowFiltering="true" AllowSorting="false" AllowPaging="true">
+    <SfDataManager Url="@($"api/sucursalservicios")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+    <GridEvents OnActionComplete="OnActionComplete" TValue="SucursalServicioDTO"></GridEvents>
     <GridEditSettings AllowAdding="true" AllowDeleting="false" AllowEditing="true" Mode="EditMode.Dialog">
         <HeaderTemplate>
             @{
-                var text = GetHeader((context as TurnoDTO)!);
+                var text = GetHeader((context as SucursalServicioDTO)!);
                 <span>@text</span>
             }
         </HeaderTemplate>
@@ -20,32 +20,31 @@
     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar"></GridFilterSettings>
     <GridPageSettings PageSize="10"></GridPageSettings>
     <GridColumns>
-        <GridColumn Field=@nameof(TurnoDTO.Id) IsPrimaryKey="true" Visible="false" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TurnoDTO.Descripcion) HeaderText="Descripción" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" Width="100"></GridColumn>
-        <GridColumn Field=@nameof(TurnoDTO.DescripcionCorta) HeaderText="Descripción Corta" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(SucursalServicioDTO.Id) IsPrimaryKey="true" Visible="false" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(SucursalServicioDTO.Descripcion) HeaderText="Descripción" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" Width="100"></GridColumn>
     </GridColumns>
 </SfGrid>
 
 @code {
-    private SfGrid<TurnoDTO>? _Grid { get; set; }
-    private List<string> Toolbar = new List<string>() { "Add", "Edit", "Delete" };
+    private SfGrid<SucursalServicioDTO>? _Grid { get; set; }
+    private List<string> Toolbar = new List<string>() { "Add", "Edit" };
     private string ButtonText { get; set; } = null!;
 
-    private string GetHeader(TurnoDTO Value)
+    private string GetHeader(SucursalServicioDTO Value)
     {
         if (Value.Id == 0)
         {
             ButtonText = "Guardar";
-            return "Crear nuevo turno";
+            return "Dar de alta servicio";
         }
         else
         {
             ButtonText = "Guardar cambios";
-            return $"Editar detalles de {Value.DescripcionCorta.ToString()}";
+            return $"Editar detalles de servicio";
         }
     }
 
-    public void OnActionComplete(ActionEventArgs<TurnoDTO> args)
+    public void OnActionComplete(ActionEventArgs<SucursalServicioDTO> args)
     {
         if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Add) || args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.BeginEdit))
         {

@@ -72,7 +72,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 bool esIntendente = false;
 
                 List<DynamicLinqExpression.Filter> listFilter =
-                    ParsingFilterFormula.PrepareFilter(filter);
+                    ParsingFilterFormula.PrepareFilter(filter!);
 
                 //Actualizacion de tabla final de filtro
                 if (listFilter.Count() > 0)
@@ -371,17 +371,10 @@ namespace NOAM_ASISTENCIA.Server.Controllers
                 // SE OBTIENE EL CONTEO DE LOS REGISTROS AGRUPADOS TOTALES Y SE FILTRA EL PAGINADO
                 response = response.Skip(skip).Take(top);
 
-                if (response != null)
-                {
-                    if (queryString.Keys.Contains("$inlinecount"))
-                        return Ok(new SyncfusionApiResponse() { Items = response!, Count = countFiltered });
-                    else
-                        return Ok(dataSource.ToListAsync());
-                }
+                if (queryString.Keys.Contains("$inlinecount"))
+                    return Ok(new SyncfusionApiResponse() { Items = response!, Count = countFiltered });
                 else
-                {
-                    return NoContent();
-                }
+                    return Ok(response);
             }
             catch (Exception)
             {

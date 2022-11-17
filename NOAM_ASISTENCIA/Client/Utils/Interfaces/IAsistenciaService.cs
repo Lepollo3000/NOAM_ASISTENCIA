@@ -6,7 +6,7 @@ namespace NOAM_ASISTENCIA.Client.Utils.Interfaces
 {
     public interface IAsistenciaService
     {
-        Task<ApiResponse<SucursalServicioViewModel>> VerificarSucursal(VerificacionSucursalRequest model);
+        Task<ApiResponse<SucursalServicioDTO>> VerificarSucursal(VerificacionSucursalRequest model);
         Task<ApiResponse<RegistroAsistenciaResult>> RegistrarAsistencia(RegistroAsistenciaRequest model);
     }
 }

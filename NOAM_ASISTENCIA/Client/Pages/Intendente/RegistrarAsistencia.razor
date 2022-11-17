@@ -70,7 +70,7 @@
         RenderFragment renderFragment = null!;
 
         // VERIFICAR LA EXISTENCIA DE SUCURSAL
-        ApiResponse<SucursalServicioViewModel> sucursalResult = await AsistenciaService
+        ApiResponse<SucursalServicioDTO> sucursalResult = await AsistenciaService
             .VerificarSucursal(new VerificacionSucursalRequest { IdSucursal = idSucursal });
 
         if (sucursalResult.Successful)
@@ -95,7 +95,7 @@
         }
     }
 
-    private async Task RegistrarAsistenciaApi(ApiResponse<SucursalServicioViewModel> sucursalResult)
+    private async Task RegistrarAsistenciaApi(ApiResponse<SucursalServicioDTO> sucursalResult)
     {
         // INICIALIZAR RENDER FRAGMENT PARA MOSTRAR LOS MENSAJES DE EXITO O ERROR
         RenderFragment renderFragment = null!;

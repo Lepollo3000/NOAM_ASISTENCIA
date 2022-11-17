@@ -16,10 +16,10 @@ namespace NOAM_ASISTENCIA.Client.Utils
             _httpClient = httpClient;
         }
 
-        public async Task<ApiResponse<SucursalServicioViewModel>> VerificarSucursal(VerificacionSucursalRequest model)
+        public async Task<ApiResponse<SucursalServicioDTO>> VerificarSucursal(VerificacionSucursalRequest model)
         {
             var response = await _httpClient.GetAsync($"api/sucursalservicios/{model.IdSucursal}");
-            var result = await response.Content.ReadFromJsonAsync<ApiResponse<SucursalServicioViewModel>>();
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<SucursalServicioDTO>>();
 
             return result!;
         }
