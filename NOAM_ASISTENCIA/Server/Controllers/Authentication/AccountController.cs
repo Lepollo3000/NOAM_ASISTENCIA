@@ -21,13 +21,15 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
         private readonly IConfiguration _configuration;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IMailService mailService, SignInManager<ApplicationUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IMailService mailService, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
         {
             _userManager = userManager;
             _configuration = configuration;
             _signInManager = signInManager;
             _mailService = mailService;
+            _roleManager = roleManager;
         }
 
         [HttpPost("[action]")]
@@ -35,8 +37,25 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
         {
             try
             {
+                foreach (string role in model.Roles)
+                {
+                    if (await _roleManager.FindByNameAsync(role) == null)
+                    {
+                        var errors = new List<string>() { "Roles no válidos." };
+                        var badRequestResponseModel = new ApiResponse<ResendEmailResult>()
+                        {
+                            Successful = false,
+                            Result = null,
+                            ErrorMessages = errors
+                        };
+
+                        return BadRequest(badRequestResponseModel);
+                    }
+                }
+
                 var newUser = new ApplicationUser
                 {
+                    Id = Guid.NewGuid(),
                     UserName = model.UserName,
                     Email = model.Email,
                     Nombre = model.Nombres,
@@ -45,6 +64,16 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Authentication
                     EmailConfirmed = true
                 };
                 var result = await _userManager.CreateAsync(newUser, model.Password);
+
+                // SI NO PONEN NINGÚN ROL, ES AUTOMÁTICAMENTE INTENDENTE
+                if (!model.Roles.Any())
+                {
+                    await _userManager.AddToRoleAsync(newUser, "Intendente");
+                }
+                else
+                {
+                    await _userManager.AddToRolesAsync(newUser, model.Roles);
+                }
 
                 if (!result.Succeeded)
                 {

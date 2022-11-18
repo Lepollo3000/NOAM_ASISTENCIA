@@ -148,7 +148,7 @@
     private Validations? validationsRef = new Validations();
     private RegisterRequest modelRequest = new RegisterRequest();
     private IEnumerable<TurnoDTO> Turnos = null!;
-    private List<string> Roles = null!;
+    private List<string> Roles = new List<string>();
 
     private bool showErrors;
     private bool showTurnos;
@@ -202,6 +202,8 @@
     {
         if (await validationsRef!.ValidateAll())
         {
+            modelRequest.Roles = Roles;
+
             await Submit();
         }
     }
