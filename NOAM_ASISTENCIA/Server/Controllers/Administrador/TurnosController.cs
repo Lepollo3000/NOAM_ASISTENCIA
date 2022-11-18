@@ -114,7 +114,7 @@ namespace NOAM_ASISTENCIA.Server.Controllers.Administrador
 
         // PUT: api/Turnos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut()]
+        [HttpPut]
         public async Task<IActionResult> PutTurno(Turno turno)
         {
             _dbcontext.Entry(turno).State = EntityState.Modified;

@@ -1,0 +1,75 @@
+﻿@page "/users"
+@attribute [Authorize(Roles = "Administrador")]
+@inject HttpClient Http;
+
+<SfGrid @ref=_Grid TValue="UserDTO" Toolbar="@Toolbar" AllowFiltering="false" AllowSorting="false" AllowPaging="true">
+    <SfDataManager Url="@($"api/users")" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
+    <GridEvents OnActionComplete="OnActionComplete" TValue="UserDTO"></GridEvents>
+    <GridEditSettings AllowAdding="true" AllowDeleting="false" AllowEditing="true" Mode="EditMode.Dialog">
+        <HeaderTemplate>
+            @{
+                var text = GetHeader((context as UserDTO)!);
+                <span>@text</span>
+            }
+        </HeaderTemplate>
+        <FooterTemplate>
+            <Button Clicked="Save" Color="Color.Primary">@ButtonText</Button>
+            <Button Clicked="Cancel">Cancelar</Button>
+        </FooterTemplate>
+    </GridEditSettings>
+    <GridPageSettings PageSize="10"></GridPageSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(UserDTO.Id) IsPrimaryKey="true" Visible="false" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(UserDTO.Username) HeaderText="Usuario" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" AllowEditing="false" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(UserDTO.Nombre) HeaderText="Nombre(s)" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(UserDTO.Apellido) HeaderText="Apellido(s)" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(UserDTO.TurnoNombre) HeaderText="Turno" FilterSettings="@(new FilterSettings{ Operator = Operator.Contains })" AllowEditing="false" Width="100"></GridColumn>
+        <GridColumn Field=@nameof(UserDTO.Lockout) HeaderText="Estado" Type="ColumnType.Boolean" AllowFiltering="false" Width="100">
+            <Template>
+                @{
+                    var registro = (context as UserDTO);
+
+                    if(!registro!.Lockout)
+                    {
+                        <span>Habilitado</span>
+                    }
+                    else
+                    {
+                        <span>Deshabilitado</span>
+                    }
+                }
+            </Template>
+        </GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    private SfGrid<UserDTO>? _Grid { get; set; }
+    private List<string> Toolbar = new List<string>() { "Edit" };
+    private string ButtonText { get; set; } = null!;
+
+    private string GetHeader(UserDTO Value)
+    {
+        ButtonText = "Guardar cambios";
+        return $"Editar detalles de servicio";
+    }
+
+    public void OnActionComplete(ActionEventArgs<UserDTO> args)
+    {
+        if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Add) || args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.BeginEdit))
+        {
+            // Based on Add or Edit action disable the PreventRender.
+            args.PreventRender = false;
+        }
+    }
+
+    private async Task Cancel()
+    {
+        await _Grid!.CloseEditAsync();     //Cancel editing action
+    }
+
+    private async Task Save()
+    {
+        await _Grid!.EndEditAsync();       //Save the edited/added data to Grid
+    }
+}
