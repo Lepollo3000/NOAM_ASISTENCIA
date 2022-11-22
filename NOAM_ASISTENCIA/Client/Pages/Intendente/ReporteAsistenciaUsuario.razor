@@ -74,7 +74,7 @@
             // OBTENER TODAS LAS COLUMNAS DEL DATAGRID
             var columns = await _Grid!.GetColumnsAsync();
             // BUSCAR EL UID DE LA COLUMNA FECHA
-            string fUid = columns[3].Uid;
+            string fUid = columns[1].Uid;
 
             _Grid!.FilterSettings.Columns.Add(
                 new GridFilterColumn
