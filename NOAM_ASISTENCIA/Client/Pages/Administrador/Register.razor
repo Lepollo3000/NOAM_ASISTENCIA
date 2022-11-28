@@ -1,4 +1,4 @@
-@page "/account/register"
+ï»¿@page "/account/register"
 @attribute [Authorize(Roles = "Administrador")]
 @layout AuthLayout
 @inject ITurnosService TurnoService
@@ -43,9 +43,9 @@
 
             <Validation>
                 <Field Margin="Margin.Is3.FromBottom">
-                    <FieldLabel For="@modelRequest.Email">Correo Electrónico</FieldLabel>
+                    <FieldLabel For="@modelRequest.Email">Correo ElectrÃ³nico</FieldLabel>
                     <FieldBody>
-                        <TextEdit Placeholder="Correo Electrónico" @bind-Text="@modelRequest.Email">
+                        <TextEdit Placeholder="Correo ElectrÃ³nico" @bind-Text="@modelRequest.Email">
                             <Feedback>
                                 <ValidationError />
                             </Feedback>
@@ -89,7 +89,7 @@
                                   TextField="@(( item ) => item.Descripcion)"
                                   ValueField="@(( item ) => item.Id)"
                                   Filter="AutocompleteFilter.Contains"
-                                  Placeholder="Ingrese la descripción de un turno y se autocompletará"
+                                  Placeholder="Ingrese la descripciÃ³n de un turno y se autocompletarÃ¡"
                                   @bind-SelectedValue="@modelRequest.IdTurno">
                         <NotFoundContent>Lo sentimos, antes de registrar usuarios se deben registrar turnos</NotFoundContent>
                     </Autocomplete>
@@ -107,9 +107,9 @@
 
             <Validation>
                 <Field Margin="Margin.Is3.FromBottom">
-                    <FieldLabel For="@modelRequest.Password">Contraseña</FieldLabel>
+                    <FieldLabel For="@modelRequest.Password">ContraseÃ±a</FieldLabel>
                     <FieldBody>
-                        <TextEdit Role="TextRole.Password" Placeholder="Contraseña" @bind-Text="@modelRequest.Password">
+                        <TextEdit Role="TextRole.Password" Placeholder="ContraseÃ±a" @bind-Text="@modelRequest.Password">
                             <Feedback>
                                 <ValidationError />
                             </Feedback>
@@ -120,9 +120,9 @@
 
             <Validation>
                 <Field Margin="Margin.Is3.FromBottom">
-                    <FieldLabel For="@modelRequest.ConfirmPassword">Confirmar Contraseña</FieldLabel>
+                    <FieldLabel For="@modelRequest.ConfirmPassword">Confirmar ContraseÃ±a</FieldLabel>
                     <FieldBody>
-                        <TextEdit Role="TextRole.Password" Placeholder="Confirmar Contraseña" @bind-Text="@modelRequest.ConfirmPassword">
+                        <TextEdit Role="TextRole.Password" Placeholder="Confirmar ContraseÃ±a" @bind-Text="@modelRequest.ConfirmPassword">
                             <Feedback>
                                 <ValidationError />
                             </Feedback>
